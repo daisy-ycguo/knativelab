@@ -71,4 +71,4 @@ NAME          DOMAIN                                                            
 fib-knative   fib-knative-knativelab.knativesh-guoyc.au-syd.containers.appdomain.cloud   True
 ```
 
-Continue on to [exercise 1](../exercise-1/README.md).
+Continue on to [exercise 4](../exercise-4/README.md).

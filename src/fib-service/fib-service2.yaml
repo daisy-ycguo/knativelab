@@ -1,0 +1,14 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: fib-knative
+  namespace: default
+spec:
+  release:
+    revisions: ["fib-knative-6pgdb", "@latest"]
+    rolloutPercent: 10
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: docker.io/ibmcom/fib-knative:vnext

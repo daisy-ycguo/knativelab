@@ -1,6 +1,6 @@
 ## Setup: Create Channel and Subscription
 
-We use `GithubSource` as the example. We will create a Addressable object to receive the event message and print it in logs.
+We use `GithubSource` as the example. We will create a channel and a subscription.
 
 
 ### Step 1. Install Istio

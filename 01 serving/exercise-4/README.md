@@ -71,4 +71,3 @@ Did you notice that the Fibonacci sequence started with 1? Most would argue that
 
 Congratulations! You've completed the lab!  If you have tons of time left over, and are interested in diving deeper, we've included 2 advanced exercises you could complete.
 
-Continue on to [exercise 6](../exercise-6/README.md).
