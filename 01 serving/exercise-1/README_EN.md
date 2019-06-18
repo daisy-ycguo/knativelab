@@ -1,12 +1,12 @@
-## 安装Istio和Knative
+## Install Knative
 
-Knative基于Kubernetes和Istio。IBM公有云上提供的Kubernetes集群可以一键安装Istio和Knative，省去安装的烦恼。
+Knative is based on Kubernetes and Istio. You can install Knative with one command line on IKS.
 
-### 使用IBM Cloud命令行工具安装
+### Install Knative with IBM Cloud CLI
 
-1. 一键安装
+1. Install with 1 command line
 
-在CloudShell窗口中执行下面的命令，这个命令会自动安装Istio和Knative。
+In your CloudShell window, input:
 ```
 $ ibmcloud ks cluster-addon-enable knative --cluster <your_cluster_name>
 Enabling add-on knative for cluster knative1-guoyc...
@@ -14,9 +14,10 @@ The istio add-on version 1.1.7 is required to enable the knative add-on. Enable 
 OK
 ```
 
-2. 检查安装后的Knative
 
-查看所有的名称空间：
+2. Look into Knative after installation
+
+List all namespaces：
 ```
 $ kubectl get namespace
 NAME                 STATUS    AGE
@@ -33,7 +34,7 @@ kube-public          Active    30m
 kube-system          Active    30m
 ```
 
-查看istio-system下面的pod，确保都在running状态：
+Check the pods under namespace `istio-system` to make sure there are no errors：
 ```
 $ kubectl get pods -n istio-system
 NAME                                     READY     STATUS    RESTARTS   AGE
@@ -49,7 +50,7 @@ istio-telemetry-697d4cf64-vmgzf          2/2       Running   6          5m31s
 prometheus-7d6678d744-swb6q              1/1       Running   0          5m31s
 ```
 
-查看knative-serving下面的pod，确保都在running状态：
+Check the pods under namespace `knative-serving` to make sure there are no errors：
 ```
 $ kubectl get pods -n knative-serving
 NAME                                     READY     STATUS    RESTARTS   AGE
@@ -61,15 +62,16 @@ networking-istio-76d4b55fd4-cf6q5        1/1       Running   0          4m33s
 webhook-75bcf549-dq587                   1/1       Running   0          4m33s
 ```
 
-3. 启动Istio自动注入（可选）
+3. Enable Istio auto injection（optional）
 
-在CloudShell窗口中执行：
+In your CloudShell window, input:
 ```
 kubectl label namespace default istio-injection=enabled
 ```
 
-4. 启用fluentd日志（可选）
+4. Enable fluentd node exporter（optional）
 
+In your CloudShell window, input:
 ```
 kubectl label nodes --all beta.kubernetes.io/fluentd-ds-ready="true"
 ```
@@ -82,15 +84,15 @@ Check
 kubectl get nodes --selector beta.kubernetes.io/fluentd-ds-ready=true
 ```
 
-继续 [exercise 2](../exercise-2/README.md).
+Continue [exercise 2](../exercise-2/README.md).
 
-5. 卸载（可选）
-如果需要卸载Knative和Istio，在CloudShell中执行这些操作：
+5. Unistall Knative（可选）
+If you want to unistall Knative and Istio, input below commands at your CloudShell window：
 ```
 ibmcloud ks cluster-addon-disable knative --cluster mycluster
 ibmcloud ks cluster-addon-disable istio --cluster mycluster
 ```
 
-6. 参考资料
-想学习Kubernetes可以访问[Kube101](https://github.com/IBM/kube101/tree/master/workshop)。
-想学习Istio可以访问[Istio101](https://github.com/IBM/istio101/tree/master/workshop).
+6. Reference
+If you want to learn Kubernetes, go to [Kube101](https://github.com/IBM/kube101/tree/master/workshop)。
+If you want to learn Istio, go to [Istio101](https://github.com/IBM/istio101/tree/master/workshop).

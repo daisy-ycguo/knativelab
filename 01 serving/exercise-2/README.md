@@ -9,6 +9,8 @@ The Knative Service object automatically manages the whole lifecycle for your wo
 
 ![](https://github.com/knative/serving/raw/master/docs/spec/images/object_model.png)
 
+***Note*** Go to `knativelab/src/fib-service` to do the following actions.
+
 # Deploy our Application to Knative using kn
 We've already created an image on dockerhub that contains the first version of our Fibonacci application. If we call the `/` endpoint, and pass in a `number` parameter, we should get the first `n` numbers of the Fibonacci sequence.
 

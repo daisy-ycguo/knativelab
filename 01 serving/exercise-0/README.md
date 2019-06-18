@@ -1,6 +1,6 @@
 ## 准备运行时环境
 
-Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的命令行窗口CloudShell。您只需要拥有IBM Cloud的注册账号，就可以进行下面的操作。如果没有注册，请到http://cloud.ibm.com上注册。
+Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的命令行窗口CloudShell。您只需要拥有IBM Cloud的注册账号，就可以进行下面的操作。如果没有注册，请到[http://cloud.ibm.com](http://cloud.ibm.com)上注册。
 
 ### 分配Kuberntes集群
 
