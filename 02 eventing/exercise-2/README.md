@@ -1,10 +1,10 @@
-## Setup: Create Channel and Subscription
+## Setup: Create Broker and Trigger
 
 We use `GithubSource` as the example. We will create a broker and a subscription.
 
 Events are sent to the Broker’s ingress and are then sent to any subscribers that are interested in that event.
 
-### Step 0. Check the default channel configuration
+### Step 0. Check the default channel configuration (optional)
 
 There are a few channel provisioner pre-installed in Knative. You can check all pre-installed channel provisioner by:
 ```
@@ -158,11 +158,137 @@ NAME        READY     REASON    BROKER    SUBSCRIBER_URI                        
 mytrigger   True                default   http://event-display.default.svc.cluster.local/   29s
 ```
 
-### Step 4. Create a filter
+Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
+```
+$ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
+☁️  cloudevents.Event
+Validation: valid
+Context Attributes,
+  specversion: 0.2
+  type: dev.knative.eventing.samples.heartbeat
+  source: https://github.com/knative/eventing-sources/cmd/heartbeats/#default/heartbeats
+  id: f073a7c0-5a52-494b-bcd9-2ee59e2091f5
+  time: 2019-06-18T10:55:44.21137922Z
+  contenttype: application/json
+Extensions,
+  beats: true
+  heart: yes
+  knativehistory: default-broker-dtszb-channel-vxw4k.default.svc.cluster.local
+  the: 42
+Data,
+  {
+    "id": 3,
+    "label": ""
+  }
+```
+Terminate this process by `ctrl+c`.
+
+### Step 4. Filter in trigger
 
 Create another event source `cronjobs` by:
 
 ```
-$ k apply -f trigger2.yaml
-trigger.eventing.knative.dev/mytrigger configured
+$ kubectl apply -f cronjob.yaml
+cronjobsource.sources.eventing.knative.dev/cronjobs created
+$ kubectl get CronJobSource
+NAME       AGE
+cronjobs   23s
 ```
+
+Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
+```
+$ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
+```
+Event message from `cronjob`:
+```
+☁️  cloudevents.Event
+Validation: valid
+Context Attributes,
+  specversion: 0.2
+  type: dev.knative.cronjob.event
+  source: /apis/v1/namespaces/default/cronjobsources/cronjobs
+  id: b611a8c8-0966-4f91-a4d7-ec4add50da7a
+  time: 2019-06-18T10:59:00.000387176Z
+  contenttype: application/json
+Extensions,
+  knativehistory: default-broker-dtszb-channel-vxw4k.default.svc.cluster.local
+Data,
+  {
+    "message": "Hello world!"
+  }
+```
+
+Delete mytrigger by:
+```
+$ kubectl delete -f trigger1.yaml
+trigger.eventing.knative.dev "mytrigger" deleted
+```
+Check a filter to the trigger `mytrigger` yaml file:
+```
+$ cat trigger2.yaml
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: mytrigger
+spec:
+  filter:
+    sourceAndType:
+      type: dev.knative.cronjob.event
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: event-displaydaisyyings-mbp:brokertrigger
+```
+
+Create a new `mytrigger` with filter by applying the new version of yaml file:
+```
+$ kubectl apply -f trigger2.yaml
+trigger.eventing.knative.dev/mytrigger created.
+```
+
+Check the new version of `mytrigger` that filter has been configured:
+```
+$ kubectl get trigger mytrigger -o yaml
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"eventing.knative.dev/v1alpha1","kind":"Trigger","metadata":{"annotations":{},"name":"mytrigger","namespace":"default"},"spec":{"filter":{"sourceAndType":{"type":"dev.knative.cronjob.event"}},"subscriber":{"ref":{"apiVersion":"serving.knative.dev/v1alpha1","kind":"Service","name":"event-display"}}}}
+  creationTimestamp: 2019-06-18T11:05:06Z
+  generation: 1
+  name: mytrigger
+  namespace: default
+  resourceVersion: "26695"
+  selfLink: /apis/eventing.knative.dev/v1alpha1/namespaces/default/triggers/mytrigger
+  uid: ee38938a-91b8-11e9-9c6b-4e0b3deb5d31
+spec:
+  broker: default
+  filter:
+    sourceAndType:
+      type: dev.knative.cronjob.event
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: event-display
+status:
+  conditions:
+  - lastTransitionTime: 2019-06-18T11:05:06Z
+    status: "True"
+    type: Broker
+  - lastTransitionTime: 2019-06-18T11:05:07Z
+    status: "True"
+    type: Ready
+  - lastTransitionTime: 2019-06-18T11:05:07Z
+    status: "True"
+    type: Subscribed
+  subscriberURI: http://event-display.default.svc.cluster.local/
+```
+
+Check the logs of `event-display`, you can see that only messages from `cronjob` now:
+```
+$ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
+```
+
