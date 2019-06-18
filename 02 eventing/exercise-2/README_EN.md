@@ -183,7 +183,7 @@ Data,
 ```
 Terminate this process by `ctrl+c`.
 
-### Step 4. Filter in trigger
+### Step 4. Create another event source CronJobs
 
 Create another event source `cronjobs` by:
 
@@ -217,12 +217,16 @@ Data,
     "message": "Hello world!"
   }
 ```
+Terminate this process by `ctrl+c`.
 
 Delete mytrigger by:
 ```
 $ kubectl delete -f trigger1.yaml
 trigger.eventing.knative.dev "mytrigger" deleted
 ```
+
+### Step 5. Define filter in trigger
+
 Check a filter to the trigger `mytrigger` yaml file:
 ```
 $ cat trigger2.yaml
