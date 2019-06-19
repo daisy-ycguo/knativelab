@@ -75,7 +75,7 @@ OK
 
    输入`ctrl+c`结束观察。
 
-继续 [exercise 2](../exercise-2/).
+继续 [exercise 2](./exercise-2.md).
 
 ## 参考资料
 

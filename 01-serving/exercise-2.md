@@ -36,19 +36,25 @@ git clone https://github.com/daisy-ycguo/knativelab.git
 
    到pod进入running状态，就说明服务已经部署好了。 输入`ctrl+c`结束观察进程。
 
-3. Let's try out our new application! First, let's get the domain name that Knative assigned to the Service we just deployed. Run the following command, and note the value for `domain`. IBM Cloud Kubernetes Service sets the default domain name for Knative to match the domain name of your IBM Cloud Kubernetes Service cluster.
+3. 获得该服务的域名
+
+每个Knative的Service都赋予了一个域名，使用这个域名可以访问到这个服务。执行下面的命令，获取服务域名信息：
 
    ```text
     kn service get fib-knative
    ```
 
-4. The domain name should look something like `fib-knative.default.bmv-knative-lab.us-south.containers.appdomain.cloud`. We can set an environment variable so that we can use this throughout the lab:
+域名大约是这个样子的：`fib-knative.default.bmv-knative-lab.us-south.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。
+
+4. 将域名配置为环境变量，便于后面使用：
 
    ```text
     export MY_DOMAIN=<your_app_domain_here>
    ```
 
-5. We can now curl this domain to try out our application. Notice that we're calling the `/` endpoint, and passing in a `number` parameter of 5. This should return the first 5 numbers of the fibonacci sequence.
+5. 调用服务
+
+现在我们可以调用这个Knative服务了。We can now curl this domain to try out our application. Notice that we're calling the `/` endpoint, and passing in a `number` parameter of 5. This should return the first 5 numbers of the fibonacci sequence.
 
    ```text
     curl $MY_DOMAIN/5
