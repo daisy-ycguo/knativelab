@@ -1,4 +1,4 @@
-# Setup: Add Filter to Trigger
+# Add Filter to Trigger
 
 We add another event source `CronJobs` which will also send event messages to default broker. We use Filter in Trigger to subscribe only a specific type of event messages.
 

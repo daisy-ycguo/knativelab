@@ -1,4 +1,4 @@
-# Setup: Simple way to catch an Event
+# Create an Event and subscribe it
 
 We use `GithubSource` as the example. We will create a Addressable object to receive the event message and print it in logs.
 

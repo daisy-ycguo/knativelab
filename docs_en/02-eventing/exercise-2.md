@@ -1,4 +1,4 @@
-# Setup: Create Broker and Trigger
+# Create Broker and Trigger
 
 We use `GithubSource` as the example. We will create a broker and a subscription.
 
