@@ -70,13 +70,6 @@ k get route
 NAME          DOMAIN                                                                     READY     REASON
 fib-knative   fib-knative-knativelab.knativesh-guoyc.au-syd.containers.appdomain.cloud   True
 ```
-## Delete Knative Service
-
-We'll redeploy this same application in a different way in the next exercise, so let's clean up.
-
-   ```text
-    kn service delete fib-knative
-   ```
 
 Continue on to [exercise 4](exercise-4.md).
 

@@ -1,18 +1,31 @@
 # 流量管控
 
-在这个实验中，我们将创建Did you notice that the Fibonacci sequence started with 1? Most would argue that the sequence should actually start with 0. There's a vnext version of the application at the vnext branch in the github project that starts the sequence with 0 instead of 1. This container image has been built and deployed to dockerhub, and tagged as vnext. We'll deploy that as v2 of our app.
+在这个实验中，我们将创建第二个版本的菲波纳契数列的服务，这个服务将从0开始构造菲波纳契数列，而不是从1开始。这个新应用的镜像也已经构建好，并且上传到了docker hub中。
 
 ## 部署第二个版本vnext
 
-1. Let's deploy vnext, again using a docker image on dockerhub. Maybe we want to slowly roll users over from our old version to the new version, or do some A/B testing of the new version to see what users like better. Let's see what the yaml for this looks like.
+1. 获取第一个Revision的名字。
 
+   通过这个命令我们将获取fib-knative服务的Revision：
    ```text
-    cat fib-service2.yaml
+    kubectl get revision
    ```
 
-   Expected Output:
+   期待的输出为:
 
    ```text
+    NAME                SERVICE NAME        GENERATION   READY   REASON
+    fib-knative-rgqjl   fib-knative-rgqjl   1            True
+   ```
+   请注意`fib-knative-rgqjl`就是第一个Revision的名字，将它拷贝下来待用。
+
+2. 使用YAML文件描述新版本的Knative Service
+
+   新版本的fib-knative包含流量控制的信息，暂时无法通过`kn`实现部署（`kn`仍然是正在开发中的项目），我们将使用YAML文件以及`kubectl apply`命令来部署新版本。
+
+   我们先来看一下`fib-service2.yaml`的内容，这里描述了新版本的配置信息：
+   ```text
+    $ cat fib-service2.yaml
     apiVersion: serving.knative.dev/v1alpha1
     kind: Service
     metadata:
@@ -29,24 +42,34 @@
                             image: docker.io/ibmcom/fib-knative:vnext
    ```
 
-   Notice that we've added a rolloutPercent of 10. We've also added our old revision name to the revisions array. Your revision name will be different than `fib-knative-xxxxx`, so you will update this file.
-
-2. Get the name of your first revision.
-
+   接下来编辑这个文件，将`fib-knative-xxxxx`替换为相应的第一个版本的名字，使用下面命令完成替换：
+   ```
+   
+   ```
+   再次使用cat查看编辑后的文件，注意版本名称`fib-knative-xxxxx`已经被替换为了正确的字符串：
    ```text
-    kubectl get revision
+    $ cat fib-service2.yaml
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    metadata:
+        name: fib-knative
+        namespace: default
+    spec:
+        release:
+            revisions: ["fib-knative-rgqjl", "@latest"]
+            rolloutPercent: 10
+            configuration:
+                revisionTemplate:
+                    spec:
+                        container:
+                            image: docker.io/ibmcom/fib-knative:vnext
    ```
 
-   Expected Output:
+   请注意，这里的`rolloutPercent: 10`表明将切换10%的流量到`@latest`版本，也就是最新的版本。
 
-   ```text
-    NAME                SERVICE NAME        GENERATION   READY   REASON
-    fib-knative-rgqjl   fib-knative-rgqjl   1            True
-   ```
+3. 部署新版本
 
-3. Edit the `fib-service2.yaml` file to change `fib-knative-xxxxx` to your own revision name, which you got from the previous step. In this example, our revision name was `fib-knative-rgqjl`
-4. Apply your new configuration to the cluster.
-
+   使用如下的`kubectl apply`命令来部署新版本：
    ```text
     kubectl apply -f fib-service2.yaml
    ```
@@ -64,6 +87,7 @@
    ```
 
 6. We should see that the curl requests are routed approximately 90/10 between the two revisions. Let's kill this process using `ctrl + c`.
+
 7. Delete fib-knative service by:
 
    ```text
