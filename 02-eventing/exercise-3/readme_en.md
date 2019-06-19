@@ -1,12 +1,12 @@
-## Setup: Add Filter to Trigger
+# Setup: Add Filter to Trigger
 
 We add another event source `CronJobs` which will also send event messages to default broker. We use Filter in Trigger to subscribe only a specific type of event messages.
 
-### Step 1. Create another event source CronJobs
+## Step 1. Create another event source CronJobs
 
 Create another event source `cronjobs` by:
 
-```
+```text
 $ kubectl apply -f cronjob.yaml
 cronjobsource.sources.eventing.knative.dev/cronjobs created
 $ kubectl get CronJobSource
@@ -15,11 +15,14 @@ cronjobs   23s
 ```
 
 Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
-```
+
+```text
 $ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
 ```
+
 Event message from `cronjob`:
-```
+
+```text
 ☁️  cloudevents.Event
 Validation: valid
 Context Attributes,
@@ -36,18 +39,21 @@ Data,
     "message": "Hello world!"
   }
 ```
+
 Terminate this process by `ctrl+c`.
 
 Delete mytrigger by:
-```
+
+```text
 $ kubectl delete -f trigger1.yaml
 trigger.eventing.knative.dev "mytrigger" deleted
 ```
 
-### Step 2. Define filter in trigger
+## Step 2. Define filter in trigger
 
 Check a filter to the trigger `mytrigger` yaml file:
-```
+
+```text
 $ cat trigger2.yaml
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
@@ -65,13 +71,15 @@ spec:
 ```
 
 Create a new `mytrigger` with filter by applying the new version of yaml file:
-```
+
+```text
 $ kubectl apply -f trigger2.yaml
 trigger.eventing.knative.dev/mytrigger created.
 ```
 
 Check the new version of `mytrigger` that filter has been configured:
-```
+
+```text
 $ kubectl get trigger mytrigger -o yaml
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
@@ -111,6 +119,8 @@ status:
 ```
 
 Check the logs of `event-display`, you can see that only messages from `cronjob` now:
-```
+
+```text
 $ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
 ```
+

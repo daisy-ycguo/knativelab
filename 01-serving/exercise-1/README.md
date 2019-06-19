@@ -75,7 +75,7 @@ OK
 
    输入`ctrl+c`结束观察。
 
-继续 [exercise 2](https://github.com/daisy-ycguo/knativelab/tree/4462a20be894ff3bc77d71d0203a57b7863a1fb2/exercise-2.md).
+继续 [exercise 2](../exercise-2/).
 
 ## 参考资料
 

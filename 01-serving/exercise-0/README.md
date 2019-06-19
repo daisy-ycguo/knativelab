@@ -53,5 +53,5 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 
    最后一步，`kubectl get nodes`能够得到正确返回，看到您的集群中的节点，那么您就可以继续下面的实验了。
 
-继续 [exercise 1](https://github.com/daisy-ycguo/knativelab/tree/4462a20be894ff3bc77d71d0203a57b7863a1fb2/exercise-1.md).
+继续 [exercise 1](../exercise-1/).
 
