@@ -1,6 +1,6 @@
 # 理解并观察 Knative 中的元素
 
-## Look into Knative Configuration
+## 步骤一：查看Knative Configuration
 
 ```text
 kubectl get configuration fib-knative -o yaml
@@ -55,7 +55,7 @@ metadata:
   selfLink: ""
 ```
 
-## Look into Knative Revision
+## 步骤二：查看Knative Revision
 
 ```text
 $ kubectl get revision
@@ -63,7 +63,7 @@ NAME                SERVICE NAME                GENERATION   READY     REASON
 fib-knative-xk4xc   fib-knative-xk4xc-service   1            True
 ```
 
-## Look into Knative Route
+## 步骤三：查看Knative Route
 
 ```text
 k get route
@@ -71,8 +71,7 @@ NAME          DOMAIN                                                            
 fib-knative   fib-knative-knativelab.knativesh-guoyc.au-syd.containers.appdomain.cloud   True
 ```
 
-
-8. 删除Knative服务
+## 步骤四：删除Knative服务
 
 我们将通过其他方法再次创建该服务，这里我们先把它删掉。
 

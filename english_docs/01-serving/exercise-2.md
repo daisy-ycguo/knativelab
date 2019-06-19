@@ -62,11 +62,6 @@ We've already created an image on dockerhub that contains the first version of o
 
    Note: To exit the watch, use `ctrl + c`.
 
-7. We'll redeploy this same application in a different way in the next exercise, so let's clean up.
-
-   ```text
-    kn service delete fib-knative
-   ```
 
 Continue on to [exercise 3](../exercise-3.md).
 
