@@ -1,40 +1,31 @@
-## 通过Knative命令行工具创建第一个Knative服务
+## Deploy our First Application to Knative using the Knative Client (kn)
+A relatively new project, the knative client aims to make interacting with Knative a seamless experience for developers. We'll try deploying an application using `kn`, then we'll deploy the same application using `kubectl` and `.yaml` files for additional control. The application for this lab is a simple node.js with express app which returns the first n numbers of the Fibonacci sequence. Once the app is deployed, you can use it by making a GET request to the `/` endpoint with a number as the parameter. 
 
-Knative Client是Knative的命令行项目，仍在开发过程中。这个实验将通过Knative命令行工具`kn`创建第一个Knative的服务。
-这个服务是一个产生连续斐波那且数列的应用。它部署后将暴露出一个端口（endpoint），向这个端口发送GET请求，就会得到斐波那契数列的前n个数字。其中`n`通过`/`之后的参数传入。
+# Our First Knative Service
+Knative Serving supports deploying and serving of serverless applications. Those applications will automatically scale up, and then back down to zero. In this exercise, we'll use the Knative Serving component to deploy our first application from a container image hosted on dockerhub. 
 
-### 前提
-- 通过kubectl连接到了云端的Kubernetes集群；
-- 启动CloudShell云端命令行窗口；
-- Istio和Knative在IBM Kubernetes Cluster上安装完毕。
+The Knative Service object automatically manages the whole lifecycle for your workload. A service represents your app on Knative. Services control the creation of other objects to ensure that your app has a URL and a new revision for each update of the service.
 
-### 第一步：获取本次实验的代码
+![](https://github.com/knative/serving/raw/master/docs/spec/images/object_model.png)
 
-在CloudShell窗口中，使用git命令获取本次实验的代码。
+***Note*** Go to `knativelab/src/fib-service` to do the following actions.
 
-```
-git clone https://github.com/daisy-ycguo/knativelab.git
-```
-这个命令将在当前目录下创建一个knativelab的目录。本次实验所需的源代码，均在`knativelab/src`下面。
+# Deploy our Application to Knative using kn
+We've already created an image on dockerhub that contains the first version of our Fibonacci application. If we call the `/` endpoint, and pass in a `number` parameter, we should get the first `n` numbers of the Fibonacci sequence.
 
-### 第二步：部署Knative服务
-
-产生斐波那契数列的应用，已经被打包为一个Docker镜像，上传到了`docker.io/ibmcom/fib-knative`。现在我们将使用这个镜像以及`kn`命令创建Knative服务。
-
-1. 部署服务：
+1. Deploy the application:
 
     ```
     kn service create --image docker.io/ibmcom/fib-knative fib-knative
     ```
 
-2. 观察Kubernetes的pod初始化及启动：
+2. Watch the pods initializing as our application gets deployed and starts up:
 
     ```
     kubectl get pods --watch
     ```
 
-    到pod进入running状态，就说明服务已经部署好了。
-    输入`ctrl+c`结束观察进程。
+    Note: To exit the watch, use `ctrl + c`.
 
 3. Let's try out our new application! First, let's get the domain name that Knative assigned to the Service we just deployed. Run the following command, and note the value for `domain`. IBM Cloud Kubernetes Service sets the default domain name for Knative to match the domain name of your IBM Cloud Kubernetes Service cluster.
 
