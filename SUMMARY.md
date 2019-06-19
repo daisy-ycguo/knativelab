@@ -11,7 +11,7 @@
   * [创建事件及订阅](02-eventing/exercise-1.md)
   * [创建Broker和Trigger](02-eventing/exercise-2.md)
   * [添加Filter](02-eventing/exercise-3.md)
-* [English Docs](docs/README.md)
+* [English Docs](english-docs/README.md)
   * [01 serving](01-serving/README.md)
     * [Prepare a Kubernetes cluster and CloudShell](01-serving/exercise-0.md)
     * [Install Istio and Knative](01-serving/exercise-1.md)
