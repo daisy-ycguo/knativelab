@@ -1,26 +1,12 @@
-# 通过Knative命令行工具创建第一个Knative服务
+# 通过Knative客户端命令行创建第一个Knative服务
 
-Knative Client是Knative的命令行项目，仍在开发过程中。这个实验将通过Knative命令行工具`kn`创建第一个Knative的服务。 这个服务是一个产生连续斐波纳契数列的应用。它部署后将暴露出一个端口（endpoint），向这个端口发送GET请求，就会得到斐波纳契数列的前n个数字。其中`n`通过`/`之后的参数传入。
+Knative Client是Knative的客户端命令行项目，仍在开发过程中。这个实验将通过Knative命令行工具`kn`创建第一个Knative的服务。 这个服务是一个产生连续斐波纳契数列的应用。它部署后将暴露出一个端口（endpoint），向这个端口发送GET请求，就会得到斐波纳契数列的前n个数字。其中`n`通过`/`之后的参数传入。
 
 ## 前提
 
 * Istio和Knative在IBM Kubernetes Cluster上安装完毕。
 
-## 第一步：获取本次实验的代码
-
-在CloudShell窗口中，使用git命令获取本次实验的代码。
-
-```text
-git clone https://github.com/daisy-ycguo/knativelab.git
-```
-
-这个命令将在当前目录下创建一个knativelab的目录。本次实验所需的源代码，均在`knativelab/src`下面。运行命令
-```
-cd knativelab/src
-```
-进入`knativelab/src`目录。
-
-## 第二步：部署Knative服务
+## 第一步：部署Knative服务
 
 产生斐波纳契数列的应用，已经被打包为一个Docker镜像，上传到了`docker.io/ibmcom/fib-knative`。现在我们将使用这个镜像以及`kn`命令创建Knative服务。
 
@@ -38,7 +24,9 @@ cd knativelab/src
 
    到pod进入running状态，就说明服务已经部署好了。 输入`ctrl+c`结束观察进程。
 
-3. 获得该服务的域名
+## 第二步：调用Knative服务
+
+1. 获得该服务的域名
 
 每个Knative的Service都赋予了一个域名，使用这个域名可以访问到这个服务。执行下面的命令，获取服务域名信息：
 
@@ -50,13 +38,13 @@ cd knativelab/src
 
 请注意，这里显示fib-knative的域名是这个样子的：`fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。。
 
-4. 拷贝上面输出中的服务域名，将域名配置为环境变量，便于后面使用：
+2. 拷贝上面输出中的服务域名，将域名配置为环境变量，便于后面使用：
 
    ```text
     export MY_DOMAIN=<your_app_domain_here>
    ```
 
-5. 调用服务
+3. 调用服务
 
 现在我们可以调用这个Knative服务了。我们将使用`curl`命令直接向这个域名发送HTTP GET请求。请注意域名后面`/`之后的，是参数`n`，表示返回数字的个数，这里设为5。它应该返回5个斐波纳契数。
 
@@ -73,7 +61,9 @@ cd knativelab/src
 恭喜你！你已经部署完成第一个Knative服务了。你也可以尝试发送不同的`n`。
 ***注意***：有时第一次调用需要等上几十秒钟才能获得返回，这是因为承载该服务的Kubernetes Pod需要冷启动，耗费时间。可以重复调用第二次，关键结果不到 一秒钟就能返回，这是因为Pod已经是活跃状态，不需要冷启动了。
 
-6. 观察Kubernetes Pod自动回收到零
+## 第三步：观察Pod的自动回收和启动
+
+1. 观察Kubernetes Pod自动回收到零
 
 Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的服务，当该服务在一定时间（大约为90秒钟）内不被调用时，Pod资源应该被回收；而再次调用时，Pod应该会自动启动。现在我们来观察Pod的结束。 
 
@@ -90,7 +80,7 @@ Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的�
    ```
 返回的服务列表中，fib-knative仍然存在。
 
-7. 观察一个全新的Kubernetes Pod自动启动
+2. 观察一个全新的Kubernetes Pod自动启动
 
 我们将再次通过curl命令调用Knative服务，请注意这次结果的返回比较慢，大约需要等待数秒钟。这是因为Knative需要启动一个全新的Pod用于处理该服务。
 

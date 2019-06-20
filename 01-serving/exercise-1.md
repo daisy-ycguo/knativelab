@@ -58,7 +58,7 @@ OK
    prometheus-7d6678d744-swb6q              1/1       Running   0          5m31s
    ```
 
-输入`ctrl+c`结束观察进程。
+   输入`ctrl+c`结束观察进程。
 
 1. Knative将安装完Istio之后开始安装。观察knative-serving下面的pod，直到都进入running状态：
 
