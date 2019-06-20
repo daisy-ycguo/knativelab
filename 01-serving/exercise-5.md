@@ -1,6 +1,6 @@
 # 流量管控
 
-在这个实验中，我们将创建第二个版本的菲波纳契数列的服务，这个新版本服务将从0开始构造菲波纳契数列，而不是从1开始。我们将操控对`fib-service`服务访问流量在新旧两个版本间分配，由此，你可以轻松实现蓝绿部署。
+在这个实验中，我们将创建第二个版本的菲波纳契数列的服务，这个新版本服务将从0开始构造菲波纳契数列，而不是从1开始。我们将操控对`fib-service`服务访问流量在新旧两个版本间分配。
 
 这个新应用的镜像也已经构建好，并且上传到了docker hub中。
 
@@ -8,13 +8,13 @@
 
 1. 获取第一个Revision的名字。
 
-   通过这个命令我们将获取fib-knative服务的Revision：
+   通过这个命令我们将获取fib-knative服务的Revision信息，其中第二行是名字：
    ```text
     $ kn revision list
     SERVICE       NAME                AGE   CONDITIONS   READY   REASON
     fib-knative   fib-knative-kv9n4   17m   4 OK / 5     True
    ```
-   请注意`fib-knative-kv9n4`就是第一个Revision的名字，将它拷贝下来待用。
+   这里`fib-knative-kv9n4`就是第一个Revision的名字，将它拷贝下来待用。
 
 2. 使用YAML文件描述新版本的Knative Service
 
@@ -72,9 +72,19 @@
     service.serving.knative.dev/fib-knative configured
    ```
 
+4. 观察两个Revision
+
+   这时，如果列出所有的Revision，就能看到两个了：
+   ```text
+    $ kn revision list
+    SERVICE       NAME                AGE   CONDITIONS   READY   REASON
+    fib-knative   fib-knative-lzsjp   1m   4 OK / 5     True
+    fib-knative   fib-knative-kv9n4   5m   4 OK / 5     True
+   ```
+
 5. 调用服务，观察流量管控
 
-   现在我们调用`curl "$MY_DOMAIN/1"`，通过分析它的返回结果，来观察路由的分配。如果返回`[1]`，表明请求被路由到第一个版本；如果返回`[0]`，则表示被路由到第二个版本。如果多次调用，那么结果将是一个由`[1]`和`[0]`组成的序列，其中`[1]`与`[0]`出现的比例，大约是9:1的关系。
+   现在我们`curl "$MY_DOMAIN/1"`时，有可能被路由到第一个Revision，也有可能被路由到第二个Revision。通过分析它的返回结果，来观察路由的分配。如果返回`[1]`，表明请求被路由到第一个Revision；如果返回`[0]`，则表示被路由到第二个Revision。如果多次调用，那么结果将是一个由`[1]`和`[0]`组成的序列，其中`[1]`与`[0]`出现的比例，大约是90:10的关系。
 
    ```text
     while sleep 0.5; do curl "$MY_DOMAIN/1"; done

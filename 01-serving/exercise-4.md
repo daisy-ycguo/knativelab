@@ -31,7 +31,7 @@ cd knativelab/src/fib-service
     kind: Service
     metadata:
       name: fib-knative
-      namespace: knativelab
+      namespace: default
     spec:
       runLatest:
         configuration:
