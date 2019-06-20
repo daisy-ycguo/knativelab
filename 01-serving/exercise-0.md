@@ -21,7 +21,8 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 
 ![](https://github.com/daisy-ycguo/knativelab/raw/master/images/cloudshell-account.png)
 
-点击右上角用户名IBM左侧的命令行窗口图标，页面会开始刷新。大约等待几分钟，一个云上的命令行窗口就准备好了。
+点击上图中右上角的“IBM”左侧的命令行窗口图标，页面会开始刷新。大约等待几分钟，一个云上的命令行窗口就创建好了。
+
 在命令行窗口中输入几条命令，如`git`或者`kubectl`或者`kn`，看到正确返回后，就可以开始使用了。
 
 ![](https://github.com/daisy-ycguo/knativelab/raw/master/images/cloudshell-terminal.png)
@@ -38,34 +39,36 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 
    ```text
    $ ibmcloud ks cluster-get $MYCLUSTER
-   Retrieving cluster kubeconsh-guoyc...
+   Retrieving cluster knative-guoyc...
    OK
    
    
-   Name:                           kubeconsh-guoyc
-   ID:                             de69ab0ff1904720bc8835fd84211c0b
+   Name:                           knative-guoyc
+   ID:                             c6e0aec577364c6faa3f1a68596bc986
    State:                          normal
-   Created:                        2019-06-16T10:27:06+0000
+   Created:                        2019-06-20T03:08:12+0000
    Location:                       syd01
-   Master URL:                     https://c2.au-syd.containers.cloud.ibm.com:20904
-   Public Service Endpoint URL:    https://c2.au-syd.containers.cloud.ibm.com:20904
+   Master URL:                     https://c2.au-syd.containers.cloud.ibm.com:30425
+   Public Service Endpoint URL:    https://c2.au-syd.containers.cloud.ibm.com:30425
    Private Service Endpoint URL:   -
    Master Location:                Sydney
-   Master Status:                  Ready (1 day ago)
+   Master Status:                  Ready (1 hour ago)
    Master State:                   deployed
    Master Health:                  normal
-   Ingress Subdomain:              kubeconsh-guoyc.au-syd.containers.appdomain.cloud
-   Ingress Secret:                 kubeconsh-guoyc
-   Workers:                        1
+   Ingress Subdomain:              knative-guoyc.au-syd.containers.appdomain.cloud
+   Ingress Secret:                 knative-guoyc
+   Workers:                        2
    Worker Zones:                   syd01
-   Version:                        1.12.9_1557* (1.13.7_1526 latest)
+   Version:                        1.13.7_1526
    Owner:                          guoyingc@cn.ibm.com
    Monitoring Dashboard:           -
    Resource Group ID:              2a926a9173174d94a6eb13284e089f88
    Resource Group Name:            default
-
-   *To update to 1.13.7_1526 version, run 'ibmcloud ks cluster-update --cluster kubeconsh-guoyc --kube-version 1.13.7_1526'. Review and make any required version changes before you update: ibm.biz/iks-versions
    ```
+
+   ***注意*** 如果返回错误`The specified cluster could not be found.`，请检查
+   - CloudShell右上角，用户名那里是否换到为`IBM`
+   - 集群的名字是否正确
 
 3. 下载你的集群的配置文件到CloudShell终端：
 
@@ -90,7 +93,8 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
    ```text
    $ kubectl get nodes
    NAME             STATUS   ROLES    AGE     VERSION
-   10.138.173.126   Ready    <none>   3d16h   v1.13.9+IKS
+   10.138.173.77   Ready    <none>   112m   v1.13.7+IKS
+   10.138.173.88   Ready    <none>   112m   v1.13.7+IKS
    ```
 
    这里，`kubectl get nodes`能够得到正确返回，看到您的集群中的节点，那么您就可以继续下面的实验了。

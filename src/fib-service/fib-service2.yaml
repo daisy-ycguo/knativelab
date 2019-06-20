@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   release:
-    revisions: ["fib-knative-6pgdb", "@latest"]
+    revisions: ["fib-knative-xxxxx", "@latest"]
     rolloutPercent: 10
     configuration:
       revisionTemplate:

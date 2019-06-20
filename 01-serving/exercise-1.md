@@ -13,8 +13,8 @@ Knative基于Kubernetes和Istio。IBM公有云上提供的Kubernetes集群可以
 在CloudShell窗口中执行下面的命令，这个命令会自动安装Istio和Knative。
 
 ```text
-$ ibmcloud ks cluster-addon-enable knative --cluster <your_cluster_name>
-Enabling add-on knative for cluster knative1-guoyc...
+$ ibmcloud ks cluster-addon-enable knative --cluster $MYCLUSTER
+Enabling add-on knative for cluster knative-guoyc...
 The istio add-on version 1.1.7 is required to enable the knative add-on. Enable istio? [y/N]> y
 OK
 ```
@@ -23,7 +23,7 @@ OK
 
 在CloudShell窗口中执行下面的命令，观察Knative的安装过程，以及安装的组件。
 
-1. 列出所有的名称空间，其中knative-\*以及istio-system是第一步中的命令安装的名称空间：
+1. 列出所有的名称空间，其中knative-\*以及istio-system是安装的名称空间：
 
    ```text
    $ kubectl get namespace
@@ -82,8 +82,8 @@ OK
 1. 如果需要卸载Knative和Istio，在CloudShell中执行这些操作：
 
    ```text
-   ibmcloud ks cluster-addon-disable knative --cluster mycluster
-   ibmcloud ks cluster-addon-disable istio --cluster mycluster
+   ibmcloud ks cluster-addon-disable knative --cluster $MYCLUSTER
+   ibmcloud ks cluster-addon-disable istio --cluster $MYCLUSTER
    ```
 
 2. 更多学习资料

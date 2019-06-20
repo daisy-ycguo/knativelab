@@ -1,98 +1,84 @@
-# 流量管控
+# 使用`kubectl apply`命令重建fib-service
 
-在这个实验中，我们将创建第二个版本的菲波纳契数列的服务，这个服务将从0开始构造菲波纳契数列，而不是从1开始。这个新应用的镜像也已经构建好，并且上传到了docker hub中。
+Knative Client是正在开发中的项目，无法支持复杂的配置。这里我们将使用YAML文件以及`kubectl apply`命令来重新部署`fib-service`并进行流量控制。
 
-## 部署第二个版本vnext
+## 前提
 
-1. 获取第一个Revision的名字。
+* 通过`kn`创建的fib-service已经删除。
 
-   通过这个命令我们将获取fib-knative服务的Revision：
+## 第一步：获取本次实验的代码
+
+在CloudShell窗口中，使用git命令获取本次实验的代码。
+
+```text
+git clone https://github.com/daisy-ycguo/knativelab.git
+```
+
+这个命令将在当前目录下创建一个knativelab的目录。本次实验所需的源代码，均在`knativelab/src`下面。运行命令
+```
+cd knativelab/src/fib-service
+```
+进入`knativelab/src/fib-service`目录。
+
+## 第二步：部署Knative服务
+
+1. 查看YAML文件
+
+   我们先来看一下`fib-service.yaml`的内容，这里：
    ```text
-    kubectl get revision
-   ```
-
-   期待的输出为:
-
-   ```text
-    NAME                SERVICE NAME        GENERATION   READY   REASON
-    fib-knative-rgqjl   fib-knative-rgqjl   1            True
-   ```
-   请注意`fib-knative-rgqjl`就是第一个Revision的名字，将它拷贝下来待用。
-
-2. 使用YAML文件描述新版本的Knative Service
-
-   新版本的fib-knative包含流量控制的信息，暂时无法通过`kn`实现部署（`kn`仍然是正在开发中的项目），我们将使用YAML文件以及`kubectl apply`命令来部署新版本。
-
-   我们先来看一下`fib-service2.yaml`的内容，这里描述了新版本的配置信息：
-   ```text
-    $ cat fib-service2.yaml
+    $ cat fib-service.yaml
     apiVersion: serving.knative.dev/v1alpha1
     kind: Service
     metadata:
-        name: fib-knative
-        namespace: default
+      name: fib-knative
+      namespace: knativelab
     spec:
-        release:
-            revisions: ["fib-knative-xxxxx", "@latest"]
-            rolloutPercent: 10
-            configuration:
-                revisionTemplate:
-                    spec:
-                        container:
-                            image: docker.io/ibmcom/fib-knative:vnext
+      runLatest:
+        configuration:
+          revisionTemplate:
+            spec:
+              container:
+                image: docker.io/ibmcom/fib-knative
    ```
 
-   接下来编辑这个文件，将`fib-knative-xxxxx`替换为相应的第一个版本的名字，使用下面命令完成替换：
-   ```
-   
-   ```
-   再次使用cat查看编辑后的文件，注意版本名称`fib-knative-xxxxx`已经被替换为了正确的字符串：
-   ```text
-    $ cat fib-service2.yaml
-    apiVersion: serving.knative.dev/v1alpha1
-    kind: Service
-    metadata:
-        name: fib-knative
-        namespace: default
-    spec:
-        release:
-            revisions: ["fib-knative-rgqjl", "@latest"]
-            rolloutPercent: 10
-            configuration:
-                revisionTemplate:
-                    spec:
-                        container:
-                            image: docker.io/ibmcom/fib-knative:vnext
-   ```
-
-   请注意，这里的`rolloutPercent: 10`表明将切换10%的流量到`@latest`版本，也就是最新的版本。
-
-3. 部署新版本
-
-   使用如下的`kubectl apply`命令来部署新版本：
-   ```text
-    kubectl apply -f fib-service2.yaml
-   ```
-
-5. Let's run some load against the app, just asking for the first number in the Fibonacci sequence so that we can clearly see which revision is being called.
+2. 部署服务
 
    ```text
-    while sleep 0.5; do curl "$MY_DOMAIN/1"; done
+    $ kubectl apply -f fib-service.yaml
+    service.serving.knative.dev/fib-knative created
    ```
 
-   Expected Output:
+3. 观察Kubernetes的pod初始化及启动：
 
    ```text
-    [1][1][0][1][1][1][1][1][1][1][1]
+    kubectl get pods --watch
    ```
 
-6. We should see that the curl requests are routed approximately 90/10 between the two revisions. Let's kill this process using `ctrl + c`.
+   到pod进入running状态，就说明服务已经部署好了。 输入`ctrl+c`结束观察进程。
 
-7. Delete fib-knative service by:
+4. 通过`kn`查看该服务
+
+   通过`kubectl apply`命令创建的服务与通过`kn`创建的服务一样，可以通过`kn service list`显示出来，域名与之前是一样的。
 
    ```text
-    kubectl delete -f fib-service.yaml
+    $ kn service list
+    NAME          DOMAIN                                                                GENERATION   AGE   CONDITIONS   READY   REASON
+    fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
    ```
 
-Congratulations! You've completed the lab! If you have tons of time left over, and are interested in diving deeper, we've included 2 advanced exercises you could complete.
+5. 调用服务
+
+   调用这个服务，同样会得到从1开始的菲波纳契数列。
+
+   ```text
+    curl $MY_DOMAIN/5
+   ```
+
+   正确的输出为:
+
+   ```text
+    [1,1,2,3,5]
+   ```
+
+继续 [exercise 5](./exercise-5.md).
 

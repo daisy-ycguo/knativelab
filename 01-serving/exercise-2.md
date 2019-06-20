@@ -4,8 +4,6 @@ Knative Client是Knative的命令行项目，仍在开发过程中。这个实�
 
 ## 前提
 
-* 通过kubectl连接到了云端的Kubernetes集群；
-* 启动CloudShell云端命令行窗口；
 * Istio和Knative在IBM Kubernetes Cluster上安装完毕。
 
 ## 第一步：获取本次实验的代码
@@ -16,7 +14,11 @@ Knative Client是Knative的命令行项目，仍在开发过程中。这个实�
 git clone https://github.com/daisy-ycguo/knativelab.git
 ```
 
-这个命令将在当前目录下创建一个knativelab的目录。本次实验所需的源代码，均在`knativelab/src`下面。
+这个命令将在当前目录下创建一个knativelab的目录。本次实验所需的源代码，均在`knativelab/src`下面。运行命令
+```
+cd knativelab/src
+```
+进入`knativelab/src`目录。
 
 ## 第二步：部署Knative服务
 
@@ -41,12 +43,14 @@ git clone https://github.com/daisy-ycguo/knativelab.git
 每个Knative的Service都赋予了一个域名，使用这个域名可以访问到这个服务。执行下面的命令，获取服务域名信息：
 
    ```text
-    kn service get fib-knative
+    $ kn service list
+    NAME          DOMAIN                                                                GENERATION   AGE   CONDITIONS   READY   REASON
+    fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
    ```
 
-域名大约是这个样子的：`fib-knative.default.bmv-knative-lab.us-south.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。
+请注意，这里显示fib-knative的域名是这个样子的：`fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。。
 
-4. 将域名配置为环境变量，便于后面使用：
+4. 拷贝上面输出中的服务域名，将域名配置为环境变量，便于后面使用：
 
    ```text
     export MY_DOMAIN=<your_app_domain_here>
@@ -54,7 +58,7 @@ git clone https://github.com/daisy-ycguo/knativelab.git
 
 5. 调用服务
 
-现在我们可以调用这个Knative服务了。我们将使用`curl`命令直接向这个域名发送HTTP GET请求。请注意域名后面`/`之后的，是参数`number`，表示返回数字的个数，这里设为5。它应该返回5个斐波纳契数。
+现在我们可以调用这个Knative服务了。我们将使用`curl`命令直接向这个域名发送HTTP GET请求。请注意域名后面`/`之后的，是参数`n`，表示返回数字的个数，这里设为5。它应该返回5个斐波纳契数。
 
    ```text
     curl $MY_DOMAIN/5
@@ -66,7 +70,8 @@ git clone https://github.com/daisy-ycguo/knativelab.git
     [1,1,2,3,5]
    ```
 
-恭喜你！你已经部署完成第一个Knative服务了。你也可以尝试发送不同的`number`。
+恭喜你！你已经部署完成第一个Knative服务了。你也可以尝试发送不同的`n`。
+***注意***：有时第一次调用需要等上几十秒钟才能获得返回，这是因为承载该服务的Kubernetes Pod需要冷启动，耗费时间。可以重复调用第二次，关键结果不到 一秒钟就能返回，这是因为Pod已经是活跃状态，不需要冷启动了。
 
 6. 观察Kubernetes Pod自动回收到零
 
@@ -89,15 +94,17 @@ Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的�
 
 我们将再次通过curl命令调用Knative服务，请注意这次结果的返回比较慢，大约需要等待数秒钟。这是因为Knative需要启动一个全新的Pod用于处理该服务。
 
-执行下面命令，等待数秒钟后，将返回5个斐波纳契数。
+这次我们将在后台执行`curl`命令，5个斐波纳契数不会立刻返回，而是会返回一个进程ID，表明有个进程启动了。
    ```text
-    curl $MY_DOMAIN/5
+   $ curl $MY_DOMAIN/5 &
+   [1] 4284
    ```
 
-再次观察，注意到一个全新的对应该服务的Pod被启动并运行了。
+这时再次观察Pod，可以看到一个全新的对应该服务的Pod被启动并运行了，Pod启动后`curl`命令应该返回的5个斐波纳契数将输出到屏幕上。
 ```
-kubectl get pods
+kubectl get pods --watch
 ```
+输入`ctrl+c`结束观察。
 
-Continue on to [exercise 3](./exercise-3.md).
+继续 [exercise 3](./exercise-3.md).
 
