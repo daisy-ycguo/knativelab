@@ -16,7 +16,7 @@ $ kn service create --image docker.io/daisyycguo/event_display-bb44423e21d22fe93
 Service 'event-display' successfully created in namespace 'default'.
 ```
 
-通过下面命令检查该服务已经创建完成，`READY`那栏显示 `OK`，`REASON`那栏显示`True`。如果还没有，请等待一段时间:
+通过下面命令检查该服务已经创建完成，`READY`那栏显示 `True`。如果还没有，请等待一段时间:
 
 ```text
 $ kn service list
@@ -47,68 +47,81 @@ spec:
 ```
 
 可以看到，它的`spec`主要包含三部分内容：
-- schedule: 定时任务的周期，这里"*/1 * * * *"表示为定时1秒钟。
-- data: 监听的代码库
+- schedule: 定时任务的周期，这里"*/1 * * * *"表示为定时1分钟。
+- data: 这里定义的是CloudEvent标准事件消息中，数据部分的内容。这个数据，包括整条CloudEvent消息，将从事件源发送出去。
 - sink: 定义了在事件源产生事件数据后，把事件数据传送的目的地，这里可以看到是Knative服务 `event-display`，也就是我们刚才创建的服务。
 
 通过下面命令创建事件源`cronjobs`:
 
 ```text
 $ kubectl apply -f cronjob.yaml
-githubsource.sources.eventing.knative.dev/githubsourcesample created
+cronjobsource.sources.eventing.knative.dev/cronjobs created
 ```
 
 检查该事件源已经被创建:
 
 ```text
 $ kubectl get cronjobsource
-NAME                 AGE
-cronjobs   54s
+NAME       AGE
+cronjobs   44s
 ```
 
 ## 步骤三：检查event-display的日志
 
-在事件源创建后，每隔1秒钟，就会有一条事件消息发送给`event-display`，`event-display`将把它打印到日志中。
+事件源`cronjobs`每隔1分钟，就会发送一条事件给`event-display`，`event-display`将把它打印到日志中。在这个逻辑的背后，是两个Kubernetes Pod在运行。
 
-```text
-$ watch kubectl get pods
+下面命令将列出所有运行的Pod：
+```
+$ kubectl get pods
+NAME                                              READY   STATUS    RESTARTS   AGE
+cronjob-cronjobs-tlzm9-7d4f79bbc8-krb8q           1/1     Running   0          98s
+event-display-46hhp-deployment-597487d855-7ctj5   2/2     Running   0          37s
 ```
 
-When event-display pod starts, check the log:
+其中，`cronjob-cronjobs-`为前缀的Pod，就是定时事件源，而`event-display-`为前缀的Pod，则是事件消息的展示应用。
 
-```text
-$ kubectl logs event-display-v6g49-deployment-7ff879ff4f-w7dcv user-container
+下面我们查看`event-display`的日志：
+```
+kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
-## 步骤四：理解工作机理
-
-- 在Github中，可以定义webhook，使得Github上的某类事件发生时，将把JSON格式的事件消息发送到该webhook上。
-- Knative通过Knative Service来实现webhook的回调。
-- webhook回调的服务，将把JSON格式的事件消息，转化为符合CloudEvent格式的事件消息，并转送给Sink所指向的地址。在这个例子中，就是event-display。
-
-通过这个命令列出所有的Knative Service，其中以githubsourcesample-*为前缀的服务，这个服务的域名将会被当成Webhook注册到github中去。
-
-```text
-$ kn service list
-NAME                       DOMAIN                                                                              GENERATION   AGE     CONDITIONS   READY   REASON
-event-display              event-display-default.knative1-guoyc.au-syd.containers.appdomain.cloud              4            45m     3 OK / 3     True
-githubsourcesample-b6f6q   githubsourcesample-b6f6q-default.knative1-guoyc.au-syd.containers.appdomain.cloud   1            3m39s   3 OK / 3     True
+能看到日志显示的CloudEvent标准消息如下面所示：
 ```
-将githubsourcesample-*为前缀的服务的域名记录在环境变量中，备用：
+_  CloudEvent: valid _
+Context Attributes,
+  SpecVersion: 0.2
+  Type: dev.knative.cronjob.event
+  Source: /apis/v1/namespaces/default/cronjobsources/cronjobs
+  ID: 1e269ba0-114f-41d6-a889-dcdebaa0a73d
+  Time: 2019-06-20T14:23:00.000371555Z
+  ContentType: application/json
+Transport Context,
+  URI: /
+  Host: event-display.default.svc.cluster.local
+  Method: POST
+Data,
+  {
+    "message": "Hello world!"
+  }
 ```
-export CALLBACKURL=githubsourcesample-......
+这说明了`cronjobs`创建后，定时产生CloudEvent标准格式的事件消息，这个消息被`event-display`接收并打印在日志中。
+
+观察完毕，使用`ctrl + c`结束进程。
+
+## 步骤四：删除事件源
+
+现在我们先删除`cronjobs`，因为接下来的实验我们将采用其他方法管理事件和订阅：
+
+```
+$ kubectl delete -f cronjob.yaml
+cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
 ```
 
-通过这个命令，可以列出所有的webhook，在里面应该可以找到你的githubsourcesample-*的服务的域名:
+`event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。过大约一分半钟后，观察没有运行状态的Pod了。
 
-***注意***这个命令里的`000111aaabbb000000`需要替换为正确的个人访问令牌的字符串，类似于`***b8261a31bc4b***ad2b86cda0267392906***`。
 ```
-curl -u 843b8261a31bc4be7ead2b86cda0267392906c2c:x-oauth-basic https://api.github.com/repos/guoyingc/eventsource-demo/hooks | jq '.[] | {message: .config.url}' | grep $CALLBACKURL
-```
-
-如果能找到你注册的webhook，那么会输出红色高亮的消息：
-```
-"message": "http://githubsourcesample-b6f6q-default.knative1-guoyc.au-syd.containers.appdomain.cloud"
+$ kubectl get pods
+No resources found.
 ```
 
-如果没有这个消息，则表明你的webhook并没有被注册进去。那么实验一定不会成功。
+继续 [exercise 2](./exercise-2.md).
