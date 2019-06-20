@@ -1,19 +1,22 @@
-# Setup: Simple way to catch an Event
+# 创建事件以及订阅该事件
 
-We use `GithubSource` as the example. We will create a Addressable object to receive the event message and print it in logs.
+在这个练习中，我们将使用`GithubSource`。我们会创建一个可访问的对象来接收事件消息，并把它打印到日志中。
 
-_**Note**_ Go to `knativelab/src/githubsrcsample` to do the following actions.
+***注意*** 下面的操作需要在目录`knativelab/src/githubsrcsample`中进行，执行下面命令进入该目录：
+```
+cd ../githubsrcsample/
+```
 
-## Step 1. Create a event display service
+## 步骤一：创建接收事件消息的服务
 
-Enter the following commands to install the event display service:
+由于Knative Service自带一个域名可以访问，所以我们创建一个Knative Service作为可访问的对象，来接受事件消息。输入下面的命令，创建`event-display`服务：
 
 ```text
 $ kn service create --image docker.io/daisyycguo/event_display-bb44423e21d22fe93666b961f6cfb013 event-display
 Service 'event-display' successfully created in namespace 'default'.
 ```
 
-Check the service is ready by:
+通过下面命令检查该服务已经创建完成，`READY`那栏显示 `OK`，`REASON`那栏显示`True`。如果还没有，请等待一段时间:
 
 ```text
 $ kn service list
@@ -21,7 +24,7 @@ NAME            DOMAIN                                                          
 event-display   event-display-default.knative1-guoyc.au-syd.containers.appdomain.cloud   1            32s   3 OK / 3     True
 ```
 
-## Step 2. Create a githubsource
+## 步骤二：创建Github事件源
 
 Enter the following commands to install the config map with github credential:
 
