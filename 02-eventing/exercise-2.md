@@ -1,195 +1,127 @@
-# Setup: Create Broker and Trigger
+# 创建Channel和Subscription
 
-We use `GithubSource` as the example. We will create a broker and a subscription.
+这里我们将使用Channel和Subscription管理事件和订阅。我们仍将使用定时事件`Cronjob`。订阅事件的可访问的对象（Accessable）仍然是Knative Service `event-display`。
 
-Events are sent to the Broker’s ingress and are then sent to any subscribers that are interested in that event.
-
-## Step 0. Check the default channel configuration \(optional\)
-
-There are a few channel provisioner pre-installed in Knative. You can check all pre-installed channel provisioner by:
-
-```text
-$ kubectl get ClusterChannelProvisioner -n knative-eventing
-NAME                READY     REASON    AGE
-in-memory           True                1h
-in-memory-channel   True                1h
+***注意*** 下面的操作要求在目录`knativelab/src/subscription`中进行，可以在CloudShell窗口执行下面命令进入该目录：
+```
+cd ~/knativelab/src/subscription/
 ```
 
-There is a default channel configuration specified in the ConfigMap named `default-channel-webhook` in the `knative-eventing` namespace. This ConfigMap may specify a cluster-wide default channel provisioner and namespace-specific channel provisioners.
+## 步骤一：创建接收事件消息的服务
+
+由于Knative Service自带一个域名可以访问，所以我们创建一个Knative Service作为可访问的对象，来接受事件消息。输入下面的命令，创建`event-display`服务：
 
 ```text
-$ kubectl get configmap default-channel-webhook -n knative-eventing -o jsonpath='{.data}'
-map[default-channel-config:clusterdefault:
-  apiversion: eventing.knative.dev/v1alpha1
-  kind: ClusterChannelProvisioner
-  name: in-memory
-namespacedefaults:
-  some-namespace:
-    apiversion: eventing.knative.dev/v1alpha1
-    kind: ClusterChannelProvisioner
-    name: some-other-provisioner
+$ kn service create --image docker.io/daisyycguo/event_display-bb44423e21d22fe93666b961f6cfb013 event-display
+Service 'event-display' successfully created in namespace 'default'.
 ```
 
-In this ConfigMap, we can see the cluster-wide default channel provisioner is set to `in-memory`.
-
-## Step 1. Create a default broker
-
-Enter the following commands:
+通过下面命令检查该服务已经创建完成，`READY`那栏显示 `True`。如果还没有，请等待一段时间:
 
 ```text
-$ kubectl label namespace default knative-eventing-injection=enabled
-namespace/default labeled
+$ kn service list
+NAME            DOMAIN                                                                   GENERATION   AGE   CONDITIONS   READY   REASON
+event-display   event-display-default.knative1-guoyc.au-syd.containers.appdomain.cloud   1            32s   3 OK / 3     True
 ```
 
-Check the default broker is created:
+## 步骤二：创建Cronjob事件源
 
+Knative预先安装了定时事件源类型CronJobSource，可以用这个事件源来定时发送事件消息。
+
+2. 创建Github事件源
+
+我们先来看一下`cronjob.yaml`的内容，这里描述了定时事件源的配置信息：
 ```text
-$ kubectl get broker
-NAME      READY     REASON    HOSTNAME                                   AGE
-default   True                default-broker.default.svc.cluster.local   14s
-```
-
-```text
-$ kubectl get broker default -o yaml
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Broker
-metadata:
-  creationTimestamp: 2019-06-18T09:36:13Z
-  generation: 1
-  labels:
-    eventing.knative.dev/namespaceInjected: "true"
-  name: default
-  namespace: default
-  resourceVersion: "16855"
-  selfLink: /apis/eventing.knative.dev/v1alpha1/namespaces/default/brokers/default
-  uid: 83792b80-91ac-11e9-ae97-72b4e0ade7ac
-spec: {}
-status:
-  address:
-    hostname: default-broker.default.svc.cluster.local
-  conditions:
-  - lastTransitionTime: 2019-06-18T09:36:15Z
-    status: "True"
-    type: Addressable
-  - lastTransitionTime: 2019-06-18T09:36:22Z
-    status: "True"
-    type: FilterReady
-  - lastTransitionTime: 2019-06-18T09:36:16Z
-    status: "True"
-    type: IngressChannelReady
-  - lastTransitionTime: 2019-06-18T09:36:25Z
-    status: "True"
-    type: IngressReady
-  - lastTransitionTime: 2019-06-18T09:36:15Z
-    status: "True"
-    type: IngressSubscriptionReady
-  - lastTransitionTime: 2019-06-18T09:36:25Z
-    status: "True"
-    type: Ready
-  - lastTransitionTime: 2019-06-18T09:36:14Z
-    status: "True"
-    type: TriggerChannelReady
-```
-
-## Step 2. Create a heartbeats event source
-
-Now we create a heartbeats event source, which will generate event message in a fixed interval to the default broker.
-
-Check the configuration of ContainerSource `heartbeats-sender`. Note the `sink` is configured to Broker `default`.
-
-```text
-$ cat heartbeats.yaml
+$ cat cronjob.yaml
 apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: ContainerSource
+kind: CronJobSource
 metadata:
-  name: heartbeats-sender
+  name: cronjobs
 spec:
-  image: docker.io/daisyycguo/heartbeats-6790335e994243a8d3f53b967cdd6398
+  schedule: "*/1 * * * *"
+  data: "{\"message\": \"Hello world!\"}"
   sink:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Broker
-    name: default
-  args:
-    - --period=1
-  env:
-    - name: POD_NAME
-      value: "heartbeats"
-    - name: POD_NAMESPACE
-      value: "default"daisyyings-mbp:brokertrigger
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    name: event-display
 ```
 
-Create the ContainerSource `heartbeats-sender` by:
+可以看到，它的`spec`主要包含三部分内容：
+- schedule: 定时任务的周期，这里"*/1 * * * *"表示为定时1分钟。
+- data: 这里定义的是CloudEvent标准事件消息中，数据部分的内容。这个数据，包括整条CloudEvent消息，将从事件源发送出去。
+- sink: 定义了在事件源产生事件数据后，把事件数据传送的目的地，这里可以看到是Knative服务 `event-display`，也就是我们刚才创建的服务。
+
+通过下面命令创建事件源`cronjobs`:
 
 ```text
-$ kubectl apply -f heartbeats.yaml
-containersource.sources.eventing.knative.dev/heartbeats-sender created
+$ kubectl apply -f cronjob.yaml
+cronjobsource.sources.eventing.knative.dev/cronjobs created
 ```
 
-Check the ContainerSource `heartbeats-sender` is created by:
+检查该事件源已经被创建:
 
 ```text
-$ kubectl get ContainerSource
-NAME                AGE
-heartbeats-sender   2m
+$ kubectl get cronjobsource
+NAME       AGE
+cronjobs   44s
 ```
 
-## Step 3. Create a trigger to add a subscriber to the broker.
+## 步骤三：检查event-display的日志
 
-A Trigger represents a desire to subscribe to events from a specific Broker. We will use the service `event-display` to subscribe to the default broker. You will be able to see the event messages sent to broker.
+事件源`cronjobs`每隔1分钟，就会发送一条事件给`event-display`，`event-display`将把它打印到日志中。在这个逻辑的背后，是两个Kubernetes Pod在运行。
 
-```text
-$ cat trigger1.yaml
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Trigger
-metadata:
-  name: mytrigger
-spec:
-  subscriber:
-    ref:
-      apiVersion: serving.knative.dev/v1alpha1
-      kind: Service
-      name: event-displaydaisyyings-mbp:brokertrigger
+下面命令将列出所有运行的Pod：
+```
+$ kubectl get pods
+NAME                                              READY   STATUS    RESTARTS   AGE
+cronjob-cronjobs-tlzm9-7d4f79bbc8-krb8q           1/1     Running   0          98s
+event-display-46hhp-deployment-597487d855-7ctj5   2/2     Running   0          37s
 ```
 
-Create the trigger by:
+其中，`cronjob-cronjobs-`为前缀的Pod，就是定时事件源，而`event-display-`为前缀的Pod，则是事件消息的展示应用。
 
-```text
-$ kubectl apply -f trigger1.yaml
-trigger.eventing.knative.dev/mytrigger created
+下面我们查看`event-display`的日志：
+```
+kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
-Check the trigger is created by:
-
-```text
-$ kubectl get trigger
-NAME        READY     REASON    BROKER    SUBSCRIBER_URI                                    AGE
-mytrigger   True                default   http://event-display.default.svc.cluster.local/   29s
+能看到日志显示的CloudEvent标准消息如下面所示：
 ```
-
-Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
-
-```text
-$ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
-☁️  cloudevents.Event
-Validation: valid
+_  CloudEvent: valid _
 Context Attributes,
-  specversion: 0.2
-  type: dev.knative.eventing.samples.heartbeat
-  source: https://github.com/knative/eventing-sources/cmd/heartbeats/#default/heartbeats
-  id: f073a7c0-5a52-494b-bcd9-2ee59e2091f5
-  time: 2019-06-18T10:55:44.21137922Z
-  contenttype: application/json
-Extensions,
-  beats: true
-  heart: yes
-  knativehistory: default-broker-dtszb-channel-vxw4k.default.svc.cluster.local
-  the: 42
+  SpecVersion: 0.2
+  Type: dev.knative.cronjob.event
+  Source: /apis/v1/namespaces/default/cronjobsources/cronjobs
+  ID: 1e269ba0-114f-41d6-a889-dcdebaa0a73d
+  Time: 2019-06-20T14:23:00.000371555Z
+  ContentType: application/json
+Transport Context,
+  URI: /
+  Host: event-display.default.svc.cluster.local
+  Method: POST
 Data,
   {
-    "id": 3,
-    "label": ""
+    "message": "Hello world!"
   }
 ```
+这说明了`cronjobs`创建后，定时产生CloudEvent标准格式的事件消息，这个消息被`event-display`接收并打印在日志中。
 
-Terminate this process by `ctrl+c`.
+观察完毕，使用`ctrl + c`结束进程。
 
+## 步骤四：删除事件源
+
+现在我们先删除`cronjobs`，因为接下来的实验我们将采用其他方法管理事件和订阅：
+
+```
+$ kubectl delete -f cronjob.yaml
+cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
+```
+
+`event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。过大约一分半钟后，观察没有运行状态的Pod了。
+
+```
+$ kubectl get pods
+No resources found.
+```
+
+继续 [exercise 2](./exercise-2.md).
