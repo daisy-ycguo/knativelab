@@ -1,5 +1,9 @@
 # 理解并观察 Knative 中的元素
 
+大家已经知道，一个Knative的服务，包括一个Configuration，一个路由以及一个或者多个Revision。这些都通过自定义资源CRD（CustomResourceDefinition）定义在Kubernetes中。这里我们将通过kubectl把他们显示出来。
+
+![](https://github.com/knative/serving/raw/master/docs/spec/images/object_model.png)
+
 ## 前提
 
 * 第一个Knative Service `fib-service`被创建出来；

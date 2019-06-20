@@ -36,7 +36,7 @@ Knative Client是Knative的客户端命令行项目，仍在开发过程中。�
     fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
    ```
 
-请注意，这里显示fib-knative的域名是这个样子的：`fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。。
+请注意，这里显示fib-knative的域名是这个样子的：`fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。
 
 2. 拷贝上面输出中的服务域名，将域名配置为环境变量，便于后面使用：
 
@@ -59,7 +59,8 @@ Knative Client是Knative的客户端命令行项目，仍在开发过程中。�
    ```
 
 恭喜你！你已经部署完成第一个Knative服务了。你也可以尝试发送不同的`n`。
-***注意***：有时第一次调用需要等上几十秒钟才能获得返回，这是因为承载该服务的Kubernetes Pod需要冷启动，耗费时间。可以重复调用第二次，关键结果不到 一秒钟就能返回，这是因为Pod已经是活跃状态，不需要冷启动了。
+
+***注意***：有时第一次调用需要等上几十秒钟才能获得返回，这是因为承载该服务的Kubernetes Pod需要冷启动，耗费时间。可以重复调用第二次，观察结果不到一秒钟就能返回，这是因为Pod已经是活跃状态，不需要冷启动了。
 
 ## 第三步：观察Pod的自动回收和启动
 
@@ -82,15 +83,16 @@ Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的�
 
 2. 观察一个全新的Kubernetes Pod自动启动
 
-我们将再次通过curl命令调用Knative服务，请注意这次结果的返回比较慢，大约需要等待数秒钟。这是因为Knative需要启动一个全新的Pod用于处理该服务。
+我们将再次通过curl命令调用Knative服务，可以预测结果返回大约需要等待几十秒钟，这是因为Knative需要启动一个全新的Pod。所以我们将在`curl`命令后面通过增加`&`字符，让系统将该进程运行在后台。
 
-这次我们将在后台执行`curl`命令，5个斐波纳契数不会立刻返回，而是会返回一个进程ID，表明有个进程启动了。
    ```text
    $ curl $MY_DOMAIN/5 &
    [1] 4284
    ```
 
-这时再次观察Pod，可以看到一个全新的对应该服务的Pod被启动并运行了，Pod启动后`curl`命令应该返回的5个斐波纳契数将输出到屏幕上。
+命令执行后，5个斐波纳契数不会立刻返回，而是会返回一个进程ID，表明有个进程启动了。
+
+这时再次观察Pod，可以看到一个全新的Pod被启动并运行了，Pod启动后`curl`调用返回的5个斐波纳契数将输出到屏幕上。
 ```
 kubectl get pods --watch
 ```
