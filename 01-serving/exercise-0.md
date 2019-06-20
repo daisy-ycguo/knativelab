@@ -82,7 +82,7 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
    export KUBECONFIG=/usr/shared-data/cloud-ibm-com-47b84451ab70b94737518f7640a9ee42-1/.bluemix/plugins/container-service/clusters/kubeconsh-guoyc/kube-config-syd01-kubeconsh-guoyc.yml
    ```
 
-4. 上面一条命令输出的最后是一个高亮的黄色的export命令，在CloudShell中拷贝该命令，并执行：
+4. 上面一条命令输出的最后一行是黄色高亮的export命令，在CloudShell中拷贝该命令，并黏贴执行：
 
    ```text
    export KUBECONFIG=/usr/shared-data/cloud-ibm-com-47b84451ab70b94737518f7640a9ee42-1/.bluemix/plugins/container-service/clusters/......
