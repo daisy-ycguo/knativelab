@@ -105,5 +105,5 @@
     kubectl delete -f fib-service.yaml
    ```
 
-恭喜你，你已经完成了第一部分的实验！
+恭喜你，你已经完成了Serving的全部实验！
 

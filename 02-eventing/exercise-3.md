@@ -4,6 +4,11 @@
 
 发送到Broker的事件，将被转发给任何对该消息感兴趣的订阅者。
 
+***注意*** 下面的操作要求在目录`knativelab/src/brokertrigger`中进行，可以在CloudShell窗口执行下面命令进入该目录：
+```
+cd ~/knativelab/src/brokertrigger/
+```
+
 ## 步骤一：检查缺省channel的配置
 
 在Knative中，通过ConfigMap`default-channel-webhook`配置了缺省的Channel供货商，这个ConfigMap中定义了集群范围的缺省Channel供货商以及名称空间范围的缺省Channel供货商。通过下面命令可以看到，在集群范围内的缺省Channel供货商为`in-memory`。
@@ -38,53 +43,20 @@ NAME      READY     REASON    HOSTNAME                                   AGE
 default   True                default-broker.default.svc.cluster.local   14s
 ```
 
-```text
-$ kubectl get broker default -o yaml
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Broker
-metadata:
-  creationTimestamp: 2019-06-18T09:36:13Z
-  generation: 1
-  labels:
-    eventing.knative.dev/namespaceInjected: "true"
-  name: default
-  namespace: default
-  resourceVersion: "16855"
-  selfLink: /apis/eventing.knative.dev/v1alpha1/namespaces/default/brokers/default
-  uid: 83792b80-91ac-11e9-ae97-72b4e0ade7ac
-spec: {}
-status:
-  address:
-    hostname: default-broker.default.svc.cluster.local
-  conditions:
-  - lastTransitionTime: 2019-06-18T09:36:15Z
-    status: "True"
-    type: Addressable
-  - lastTransitionTime: 2019-06-18T09:36:22Z
-    status: "True"
-    type: FilterReady
-  - lastTransitionTime: 2019-06-18T09:36:16Z
-    status: "True"
-    type: IngressChannelReady
-  - lastTransitionTime: 2019-06-18T09:36:25Z
-    status: "True"
-    type: IngressReady
-  - lastTransitionTime: 2019-06-18T09:36:15Z
-    status: "True"
-    type: IngressSubscriptionReady
-  - lastTransitionTime: 2019-06-18T09:36:25Z
-    status: "True"
-    type: Ready
-  - lastTransitionTime: 2019-06-18T09:36:14Z
-    status: "True"
-    type: TriggerChannelReady
+查看承载缺省Borker的Pod已经启动：
 ```
+$ kubectl get pods
+NAME                                              READY   STATUS    RESTARTS   AGE
+default-broker-filter-798df8bc75-77m2r            1/1     Running   0          43s
+default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          43s
+```
+他们一个是缺省Broker的Ingress，负责接收消息，一个是缺省Broker的过滤器，负责转发消息。
 
-## Step 2. Create a heartbeats event source
+## 步骤三：创建心跳事件源
 
-Now we create a heartbeats event source, which will generate event message in a fixed interval to the default broker.
+我们来创建一个心跳事件源，它将在规定的间隔内把心跳次数封装为事件消息发送给缺省Broker。心跳事件源使用了`ContainerSource`，容器镜像则为`docker.io/daisyycguo/heartbeats-6790335e994243a8d3f53b967cdd6398`。
 
-Check the configuration of ContainerSource `heartbeats-sender`. Note the `sink` is configured to Broker `default`.
+我们先来看一下`heartbeats.yaml`的内容，这里描述了定时事件源的配置信息：
 
 ```text
 $ cat heartbeats.yaml
@@ -104,28 +76,39 @@ spec:
     - name: POD_NAME
       value: "heartbeats"
     - name: POD_NAMESPACE
-      value: "default"daisyyings-mbp:brokertrigger
+      value: "default"
 ```
 
-Create the ContainerSource `heartbeats-sender` by:
+可以看到，它的`spec`主要包含四部分内容：
+- image：对于一个`ContainerSource`来说，这个属性是最关键的，它说明了这个事件源要启动哪个容器镜像；
+- args和env：这是启动容器时，传递给容器的参数和环境变量；
+- sink：说明了事件消息的发送目的地，这里的配置表示，事件消息将发送到缺省的Broker中。
 
+使用下面命令创建ContainerSource `heartbeats-sender`：
 ```text
 $ kubectl apply -f heartbeats.yaml
 containersource.sources.eventing.knative.dev/heartbeats-sender created
 ```
 
-Check the ContainerSource `heartbeats-sender` is created by:
-
+查看`heartbeats-sender`已经创建好：
 ```text
 $ kubectl get ContainerSource
 NAME                AGE
 heartbeats-sender   2m
 ```
 
-## Step 3. Create a trigger to add a subscriber to the broker.
+检查承载`heartbeats-sender`的Pod已经启动：
+```
+$ kubectl get pods $(kubectl get pods --selector=eventing.knative.dev/source=heartbeats-sender --output=jsonpath="{.items..metadata.name}")
+NAME                                       READY   STATUS    RESTARTS   AGE
+heartbeats-sender-dhnz8-569967d749-8wbwt   1/1     Running   0          2m21s
+```
 
-A Trigger represents a desire to subscribe to events from a specific Broker. We will use the service `event-display` to subscribe to the default broker. You will be able to see the event messages sent to broker.
+## 步骤四：创建Trigger，给Broker增加订阅者
 
+Trigger表明了想要订阅某些事件的愿望。我们使用Trigger将服务`event-display`订阅到缺省的Broker，它将会把发送到Broker的消息打印到日志中。
+
+我们先来看一下`trigger1.yaml`的内容，这里描述了Trigger的配置信息：
 ```text
 $ cat trigger1.yaml
 apiVersion: eventing.knative.dev/v1alpha1
@@ -137,48 +120,69 @@ spec:
     ref:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
-      name: event-displaydaisyyings-mbp:brokertrigger
+      name: event-display
 ```
 
-Create the trigger by:
+可以看到，它的`spec`中的`subscriber`描述了一个订阅者，具体到这里，是`event-display`服务。
 
+使用下面命令创建Trigger `mytrigger`：
 ```text
 $ kubectl apply -f trigger1.yaml
 trigger.eventing.knative.dev/mytrigger created
 ```
 
-Check the trigger is created by:
-
+查看`mytrigger`已经创建好：
 ```text
 $ kubectl get trigger
 NAME        READY     REASON    BROKER    SUBSCRIBER_URI                                    AGE
 mytrigger   True                default   http://event-display.default.svc.cluster.local/   29s
 ```
 
-Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
+## 步骤五：检查event-display的日志
 
-```text
-$ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
-☁️  cloudevents.Event
-Validation: valid
+下面命令将列出所有运行的Pod，观察`event-display`应用所在的Pod已经开始运行：
+```
+$ kubectl get pods
+NAME                                              READY   STATUS    RESTARTS   AGE
+default-broker-filter-798df8bc75-77m2r            1/1     Running   0          4m32s
+default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          4m32s
+event-display-46hhp-deployment-597487d855-dm77n   2/2     Running   0          19s
+heartbeats-sender-dhnz8-569967d749-8wbwt          1/1     Running   0          3m36s
+```
+
+查看`event-display`的日志：
+```
+kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
+```
+
+能看到日志显示的CloudEvent标准消息如下面所示：
+```
+_  CloudEvent: valid _
 Context Attributes,
-  specversion: 0.2
-  type: dev.knative.eventing.samples.heartbeat
-  source: https://github.com/knative/eventing-sources/cmd/heartbeats/#default/heartbeats
-  id: f073a7c0-5a52-494b-bcd9-2ee59e2091f5
-  time: 2019-06-18T10:55:44.21137922Z
-  contenttype: application/json
-Extensions,
-  beats: true
-  heart: yes
-  knativehistory: default-broker-dtszb-channel-vxw4k.default.svc.cluster.local
-  the: 42
+  SpecVersion: 0.2
+  Type: dev.knative.eventing.samples.heartbeat
+  Source: https://github.com/knative/eventing-sources/cmd/heartbeats/#default/heartbeats
+  ID: 5fff8cd4-96c5-4fd6-b116-2a96977791e2
+  Time: 2019-06-20T16:04:08.921707135Z
+  ContentType: application/json
+  Extensions:
+    beats: true
+    heart: yes
+    knativehistory: default-broker-tp97m-channel-znkp9.default.svc.cluster.local
+    the: 42
+Transport Context,
+  URI: /
+  Host: event-display.default.svc.cluster.local
+  Method: POST
 Data,
   {
-    "id": 3,
+    "id": 26,
     "label": ""
   }
 ```
+心跳事件消息已经被打印出来，这说明了`heartbeats-sender`创建后，产生的心跳事件消息，已经被缺省Broker接受，并转发给`event-display`，`event-display`接收消息并打印在日志中
 
-Terminate this process by `ctrl+c`.
+观察完毕，使用`ctrl + c`结束进程。
+
+如果要继续下一个实验，则不必任何清理工作，继续 [exercise 4](./exercise-4.md).
 
