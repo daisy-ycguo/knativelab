@@ -41,7 +41,8 @@
 3. 编辑fib-service2.yaml，写入正确的Revision名字
 
    接下来编辑fib-service2.yaml，将`fib-knative-xxxxx`替换为相应的第一个Revision的名字，使用下面命令完成替换。
-   ***注意***这个命令里的`your_Revision_ID`就是刚才让大家拷贝的Revision的名字，类似于`fib-knative-kv9n4`：
+
+   ***注意***这个命令里的`your_Revision_ID`需要替换为刚才让大家拷贝的Revision的名字，类似于`fib-knative-kv9n4`：
    ```
    sed -i 's/fib-knative-xxxxx/your_Revision_ID/' fib-service2.yaml
    ```
