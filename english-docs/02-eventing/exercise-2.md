@@ -18,7 +18,7 @@ in-memory-channel   True                1h
 There is a default channel configuration specified in the ConfigMap named `default-channel-webhook` in the `knative-eventing` namespace. This ConfigMap may specify a cluster-wide default channel provisioner and namespace-specific channel provisioners.
 
 ```text
-$ k get configmap default-channel-webhook -n knative-eventing -o jsonpath='{.data}'
+$ kubectl get configmap default-channel-webhook -n knative-eventing -o jsonpath='{.data}'
 map[default-channel-config:clusterdefault:
   apiversion: eventing.knative.dev/v1alpha1
   kind: ClusterChannelProvisioner
@@ -50,7 +50,7 @@ default   True                default-broker.default.svc.cluster.local   14s
 ```
 
 ```text
-$ k get broker default -o yaml
+$ kubectl get broker default -o yaml
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Broker
 metadata:

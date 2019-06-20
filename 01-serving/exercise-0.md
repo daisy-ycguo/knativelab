@@ -9,7 +9,7 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 
 ## 第一步：分配Kuberntes集群
 
-我们预先为这次实验创建了若干个多节点的Kubernetes集群，请您到IBM工作人员那里分配一个Kubernetes集群。 分配到集群后，请记住您的集群的名字。登陆[http://cloud.ibm.com](http://cloud.ibm.com)，在您的账号下查看这个Kubernetes集群。
+我们预先为这次实验创建了若干个多节点的Kubernetes集群，请您到IBM工作人员那里分配一个Kubernetes集群。 分配到集群后，请记住您的集群的名字。
 
 ## 第二步：准备CloudShell
 

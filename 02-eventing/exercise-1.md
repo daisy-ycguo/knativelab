@@ -69,6 +69,6 @@ $ watch kubectl get pods
 When event-display pod starts, check the log:
 
 ```text
-$ k logs event-display-4pvpl
+$ kubectl logs event-display-4pvpl
 ```
 

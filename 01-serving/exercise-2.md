@@ -99,5 +99,5 @@ Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的�
 kubectl get pods
 ```
 
-Continue on to [exercise 3](../exercise-3.md).
+Continue on to [exercise 3](./exercise-3.md).
 

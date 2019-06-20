@@ -80,5 +80,5 @@ fib-knative   fib-knative-knativelab.knativesh-guoyc.au-syd.containers.appdomain
    ```
 
 
-Continue on to [exercise 4](exercise-4.md).
+Continue on to [exercise 4](./exercise-4.md).
 

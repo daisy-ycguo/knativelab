@@ -67,7 +67,7 @@ spec:
     ref:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
-      name: event-displaydaisyyings-mbp:brokertrigger
+      name: event-display
 ```
 
 Create a new `mytrigger` with filter by applying the new version of yaml file:
