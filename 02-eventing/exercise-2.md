@@ -1,4 +1,4 @@
-# 创建Channel和Subscription
+# 使用Channel和Subscription
 
 这里我们将使用Channel和Subscription管理事件和订阅。我们仍将使用定时事件`Cronjob`。订阅事件的可访问的对象（Accessable）仍然是Knative Service `event-display`。
 

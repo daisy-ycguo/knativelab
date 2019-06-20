@@ -93,11 +93,13 @@ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=
 
 ## 步骤四：删除所创建的对象
 
+通过下面命令删除实验中创建的Trigger，事件源以及服务：
 ```
-$ kubectl delete -f .
-channel.eventing.knative.dev "mychannel" deleted
+$ source deleteall.sh
+trigger.eventing.knative.dev "mytrigger" deleted
 cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
-subscription.eventing.knative.dev "mysubscription" deleted
+containersource.sources.eventing.knative.dev "heartbeats-sender" deleted
+service.serving.knative.dev "event-display" deleted
 ```
 
 恭喜你，你已经完成了Eventing的全部实验！

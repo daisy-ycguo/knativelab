@@ -1,4 +1,4 @@
-# 创建Broker和Trigger
+# 使用Broker和Trigger
 
 这里我们将使用Broker和Trigger管理事件和订阅。我们将使用`ContainerSource`作为事件源。
 
