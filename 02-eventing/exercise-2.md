@@ -7,28 +7,53 @@
 cd ~/knativelab/src/subscription/
 ```
 
-## 步骤一：创建接收事件消息的服务
+## 步骤一：创建Channel
 
-由于Knative Service自带一个域名可以访问，所以我们创建一个Knative Service作为可访问的对象，来接受事件消息。输入下面的命令，创建`event-display`服务：
+1. 查看预装的Channel供货商
+
+Knative中预装了几个Channel的供货商，通过下面命令查看预装的Channel供货商有两个`in-memory`和`in-memory-channel`，它们其实并没什么差别:
 
 ```text
-$ kn service create --image docker.io/daisyycguo/event_display-bb44423e21d22fe93666b961f6cfb013 event-display
-Service 'event-display' successfully created in namespace 'default'.
+$ kubectl get ClusterChannelProvisioner -n knative-eventing
+NAME                READY     REASON    AGE
+in-memory           True                1h
+in-memory-channel   True                1h
 ```
 
-通过下面命令检查该服务已经创建完成，`READY`那栏显示 `True`。如果还没有，请等待一段时间:
+2. 使用供货商`in-memory-channel`创建Channel。
 
-```text
-$ kn service list
-NAME            DOMAIN                                                                   GENERATION   AGE   CONDITIONS   READY   REASON
-event-display   event-display-default.knative1-guoyc.au-syd.containers.appdomain.cloud   1            32s   3 OK / 3     True
+首先查看`channel.yaml`的内容，它表示将使用`in-memory-channel`创建一个Channel`mychannel`：
+```
+$ cat channel.yaml
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Channel
+metadata:
+  name: mychannel
+spec:
+  provisioner:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: ClusterChannelProvisioner
+    name: in-memory-channel
+```
+
+使用下面命令创建Channel：
+```
+$ kubectl apply -f channel.yaml
+channel.eventing.knative.dev/mychannel created
+```
+
+查看`mychannel`已经创建好：
+```
+$ kubectl get channel
+NAME        READY   REASON   AGE
+mychannel   True             55s
 ```
 
 ## 步骤二：创建Cronjob事件源
 
 Knative预先安装了定时事件源类型CronJobSource，可以用这个事件源来定时发送事件消息。
 
-2. 创建Github事件源
+2. 创建Cronjob事件源
 
 我们先来看一下`cronjob.yaml`的内容，这里描述了定时事件源的配置信息：
 ```text

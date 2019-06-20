@@ -28,7 +28,7 @@ event-display   event-display-default.knative1-guoyc.au-syd.containers.appdomain
 
 Knative预先安装了定时事件源类型CronJobSource，可以用这个事件源来定时发送事件消息。
 
-2. 创建Github事件源
+1. 创建Cronjob事件源
 
 我们先来看一下`cronjob.yaml`的内容，这里描述了定时事件源的配置信息：
 ```text
@@ -58,7 +58,7 @@ $ kubectl apply -f cronjob.yaml
 cronjobsource.sources.eventing.knative.dev/cronjobs created
 ```
 
-检查该事件源已经被创建:
+2. 检查该事件源已经被创建:
 
 ```text
 $ kubectl get cronjobsource

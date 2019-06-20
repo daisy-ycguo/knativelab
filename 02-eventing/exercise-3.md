@@ -6,15 +6,6 @@
 
 ## 步骤一：检查缺省channel的配置
 
-Knative中预装了几个Channel的供货商，通过下面命令查看预装的Channel供货商有两个`in-memory`和`in-memory-channel`，它们其实并没什么差别:
-
-```text
-$ kubectl get ClusterChannelProvisioner -n knative-eventing
-NAME                READY     REASON    AGE
-in-memory           True                1h
-in-memory-channel   True                1h
-```
-
 在Knative中，通过ConfigMap`default-channel-webhook`配置了缺省的Channel供货商，这个ConfigMap中定义了集群范围的缺省Channel供货商以及名称空间范围的缺省Channel供货商。通过下面命令可以看到，在集群范围内的缺省Channel供货商为`in-memory`。
 
 ```text
