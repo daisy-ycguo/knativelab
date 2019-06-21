@@ -10,3 +10,4 @@ spec:
         spec:
           container:
             image: docker.io/ibmcom/fib-knative
+

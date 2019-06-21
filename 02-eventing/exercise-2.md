@@ -11,90 +11,90 @@ cd ~/knativelab/src/subscription/
 
 1. 查看预装的Channel供货商
 
-Knative中预装了几个Channel的供货商，通过下面命令查看预装的Channel供货商有两个`in-memory`和`in-memory-channel`，它们其实并没什么差别:
+  Knative中预装了几个Channel的供货商，通过下面命令查看预装的Channel供货商有两个`in-memory`和`in-memory-channel`，它们其实并没什么差别:
 
-```text
-$ kubectl get ClusterChannelProvisioner -n knative-eventing
-NAME                READY     REASON    AGE
-in-memory           True                1h
-in-memory-channel   True                1h
-```
+  ```text
+  $ kubectl get ClusterChannelProvisioner -n knative-eventing
+  NAME                READY     REASON    AGE
+  in-memory           True                1h
+  in-memory-channel   True                1h
+  ```
 
 2. 使用供货商`in-memory-channel`创建Channel。
 
-首先查看`channel.yaml`的内容，它表示将使用`in-memory-channel`创建一个Channel`mychannel`：
-```
-$ cat channel.yaml
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Channel
-metadata:
-  name: mychannel
-spec:
-  provisioner:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: ClusterChannelProvisioner
-    name: in-memory-channel
-```
+  首先查看`channel.yaml`的内容，它表示将使用`in-memory-channel`创建一个Channel`mychannel`：
+  ```
+  $ cat channel.yaml
+  apiVersion: eventing.knative.dev/v1alpha1
+  kind: Channel
+  metadata:
+    name: mychannel
+  spec:
+    provisioner:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: ClusterChannelProvisioner
+      name: in-memory-channel
+  ```
 
-使用下面命令创建Channel：
-```
-$ kubectl apply -f channel.yaml
-channel.eventing.knative.dev/mychannel created
-```
+  使用下面命令创建Channel：
+  ```
+  $ kubectl apply -f channel.yaml
+  channel.eventing.knative.dev/mychannel created
+  ```
 
-查看`mychannel`已经创建好：
-```
-$ kubectl get channel
-NAME        READY   REASON   AGE
-mychannel   True             55s
-```
+  查看`mychannel`已经创建好：
+  ```
+  $ kubectl get channel
+  NAME        READY   REASON   AGE
+  mychannel   True             55s
+  ```
 
 ## 步骤二：创建Cronjob事件源
 
 Knative预先安装了定时事件源类型CronJobSource，可以用这个事件源来定时发送事件消息。
 
-1. 创建Cronjob事件源
+  1. 创建Cronjob事件源
 
-我们先来看一下`cronjob.yaml`的内容，这里描述了定时事件源的配置信息：
-```text
-$ cat cronjob.yaml
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: CronJobSource
-metadata:
-  name: cronjobs
-spec:
-  schedule: "*/1 * * * *"
-  data: "{\"message\": \"Hello world!\"}"
-  sink:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Channel
-    name: mychannel
-```
+  我们先来看一下`cronjob.yaml`的内容，这里描述了定时事件源的配置信息：
+  ```text
+  $ cat cronjob.yaml
+  apiVersion: sources.eventing.knative.dev/v1alpha1
+  kind: CronJobSource
+  metadata:
+    name: cronjobs
+  spec:
+    schedule: "*/1 * * * *"
+    data: "{\"message\": \"Hello world!\"}"
+    sink:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: Channel
+      name: mychannel
+  ```
 
-可以看到，它的`spec`主要包含三部分内容，其中`schedule`和`data`与上次实验完全相同，而`sink`则不同。`sink`定义了事件消息将被转发到`mychannel`中。
+  可以看到，它的`spec`主要包含三部分内容，其中`schedule`和`data`与上次实验完全相同，而`sink`则不同。`sink`定义了事件消息将被转发到`mychannel`中。
 
-通过下面命令创建事件源`cronjobs`:
+  通过下面命令创建事件源`cronjobs`:
 
-```text
-$ kubectl apply -f cronjob.yaml
-cronjobsource.sources.eventing.knative.dev/cronjobs created
-```
+  ```text
+  $ kubectl apply -f cronjob.yaml
+  cronjobsource.sources.eventing.knative.dev/cronjobs created
+  ```
 
 2. 检查该事件源已经被创建
 
-```text
-$ kubectl get cronjobsource
-NAME       AGE
-cronjobs   44s
-```
+  ```text
+  $ kubectl get cronjobsource
+  NAME       AGE
+  cronjobs   44s
+  ```
 
 3. 检查承载Cronjob应用的Pod已经启动
 
-```
-$ kubectl get pods
-NAME                                      READY   STATUS    RESTARTS   AGE
-cronjob-cronjobs-9wcq9-7d75fdbd8c-m5ddh   1/1     Running   0          21s
-```
+  ```
+  $ kubectl get pods
+  NAME                                      READY   STATUS    RESTARTS   AGE
+  cronjob-cronjobs-9wcq9-7d75fdbd8c-m5ddh   1/1     Running   0          21s
+  ```
 
 ## 步骤三：定义Subscription
 
@@ -102,44 +102,44 @@ cronjob-cronjobs-9wcq9-7d75fdbd8c-m5ddh   1/1     Running   0          21s
 
 1. 创建Subscription
 
-我们先来看一下`subscription.yaml`的内容，这里描述了定时事件源的配置信息：
-```text
-$ cat subscription.yaml
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
-metadata:
-  name: mysubscription
-  namespace: default
-spec:
-  channel:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Channel
-    name: mychannel
-  subscriber:
-    ref:
-      apiVersion: serving.knative.dev/v1alpha1
-      kind: Service
-      name: event-display
-```
+  我们先来看一下`subscription.yaml`的内容，这里描述了定时事件源的配置信息：
+  ```text
+  $ cat subscription.yaml
+  apiVersion: eventing.knative.dev/v1alpha1
+  kind: Subscription
+  metadata:
+    name: mysubscription
+    namespace: default
+  spec:
+    channel:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: Channel
+      name: mychannel
+    subscriber:
+      ref:
+        apiVersion: serving.knative.dev/v1alpha1
+        kind: Service
+        name: event-display
+  ```
 
-可以看到，它的`spec`主要包含两部分内容：
-- channel：所订阅的Channel；
-- subscriber：Channel的订阅者，该Channel中的事件消息将被转发到所有订阅者。这里订阅者为`event-display`。
+  可以看到，它的`spec`主要包含两部分内容：
+  - channel：所订阅的Channel；
+  - subscriber：Channel的订阅者，该Channel中的事件消息将被转发到所有订阅者。这里订阅者为`event-display`。
 
-通过下面命令创建Subscription`mysubscription`:
+  通过下面命令创建Subscription`mysubscription`:
 
-```text
-$ kubectl apply -f subscription.yaml
-subscription.eventing.knative.dev/mysubscription created
-```
+  ```text
+  $ kubectl apply -f subscription.yaml
+  subscription.eventing.knative.dev/mysubscription created
+  ```
 
 2. 检查Subscription已经被创建
 
-```text
-$ kubectl get subscription
-NAME             READY   REASON   AGE
-mysubscription   True             29s
-```
+  ```text
+  $ kubectl get subscription
+  NAME             READY   REASON   AGE
+  mysubscription   True             29s
+  ```
 
 ## 步骤三：检查event-display的日志
 
