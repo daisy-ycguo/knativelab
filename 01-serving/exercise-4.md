@@ -1,84 +1,109 @@
-# 使用`kubectl apply`命令重建fib-service
+# 流量管控
 
-Knative Client是正在开发中的项目，无法支持复杂的配置。这里我们将使用YAML文件以及`kubectl apply`命令来重新部署`fib-service`并进行流量控制。
+在这个实验中，我们将创建第二个版本的菲波纳契数列的服务，这个新版本服务将从0开始构造菲波纳契数列，而不是从1开始。我们将操控对`fib-service`服务访问流量在新旧两个版本间分配。
 
-## 前提
+这个新应用的镜像也已经构建好，并且上传到了docker hub中。
 
-* 通过`kn`创建的fib-service已经删除。
+## 部署第二个版本vnext
 
-## 第一步：获取本次实验的代码
+1. 获取第一个Revision的名字。
 
-在CloudShell窗口中，使用git命令获取本次实验的代码。
-
-```text
-git clone https://github.com/daisy-ycguo/knativelab.git
-```
-
-这个命令将在当前目录下创建一个knativelab的目录。本次实验所需的源代码，均在`knativelab/src`下面。运行命令
-```
-cd knativelab/src/fib-service
-```
-进入`knativelab/src/fib-service`目录。
-
-## 第二步：部署Knative服务
-
-1. 查看YAML文件
-
-   我们先来看一下`fib-service.yaml`的内容，这里：
+   通过这个命令我们将获取fib-knative服务的Revision信息，其中第二行是名字：
    ```text
-    $ cat fib-service.yaml
+    $ kn revision list
+    SERVICE       NAME                AGE   CONDITIONS   READY   REASON
+    fib-knative   fib-knative-kv9n4   17m   4 OK / 5     True
+   ```
+   这里`fib-knative-kv9n4`就是第一个Revision的名字，将它拷贝下来待用。
+
+2. 使用YAML文件描述新版本的Knative Service
+
+   我们先来看一下`fib-service2.yaml`的内容，这里描述了新版本的配置信息：
+   ```text
+    $ cat fib-service2.yaml
     apiVersion: serving.knative.dev/v1alpha1
     kind: Service
     metadata:
-      name: fib-knative
-      namespace: default
+        name: fib-knative
+        namespace: default
     spec:
-      runLatest:
-        configuration:
-          revisionTemplate:
-            spec:
-              container:
-                image: docker.io/ibmcom/fib-knative
+        release:
+            revisions: ["fib-knative-xxxxx", "@latest"]
+            rolloutPercent: 10
+            configuration:
+                revisionTemplate:
+                    spec:
+                        container:
+                            image: docker.io/ibmcom/fib-knative:vnext
+   ```
+   其中，镜像采用的是新版本`docker.io/ibmcom/fib-knative:vnext`，并且加入了流量控制信息，这里的`rolloutPercent: 10`表明将切换10%的流量路由到`@latest`版本，也就是最新的版本，90%的流量路由到Revision `fib-knative-xxxxx`。
+
+3. 编辑fib-service2.yaml，写入正确的Revision名字
+
+   接下来编辑fib-service2.yaml，将`fib-knative-xxxxx`替换为相应的第一个Revision的名字，使用下面命令完成替换。
+
+   ***注意***这个命令里的`your_Revision_ID`需要替换为刚才让大家拷贝的Revision的名字，类似于`fib-knative-kv9n4`：
+   ```
+   sed -i 's/fib-knative-xxxxx/your_Revision_ID/' fib-service2.yaml
+   ```
+   再次使用cat查看编辑后的文件，注意版本名称`fib-knative-xxxxx`已经被替换为了正确的字符串：
+   ```text
+    $ cat fib-service2.yaml
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    metadata:
+        name: fib-knative
+        namespace: default
+    spec:
+        release:
+            revisions: ["fib-knative-kv9n4", "@latest"]
+            rolloutPercent: 10
+            configuration:
+                revisionTemplate:
+                    spec:
+                        container:
+                            image: docker.io/ibmcom/fib-knative:vnext
    ```
 
-2. 部署服务
+3. 部署新版本
+
+   使用如下的`kubectl apply`命令来部署新版本：
+   ```text
+    $ kubectl apply -f fib-service2.yaml
+    service.serving.knative.dev/fib-knative configured
+   ```
+
+4. 观察两个Revision
+
+   这时，如果列出所有的Revision，就能看到两个了：
+   ```text
+    $ kn revision list
+    SERVICE       NAME                AGE   CONDITIONS   READY   REASON
+    fib-knative   fib-knative-lzsjp   1m   4 OK / 5     True
+    fib-knative   fib-knative-kv9n4   5m   4 OK / 5     True
+   ```
+
+5. 调用服务，观察流量管控
+
+   现在我们`curl "$MY_DOMAIN/1"`时，有可能被路由到第一个Revision，也有可能被路由到第二个Revision。通过分析它的返回结果，来观察路由的分配。如果返回`[1]`，表明请求被路由到第一个Revision；如果返回`[0]`，则表示被路由到第二个Revision。如果多次调用，那么结果将是一个由`[1]`和`[0]`组成的序列，其中`[1]`与`[0]`出现的比例，大约是90:10的关系。
 
    ```text
-    $ kubectl apply -f fib-service.yaml
-    service.serving.knative.dev/fib-knative created
+    while sleep 0.5; do curl "$MY_DOMAIN/1"; done
    ```
 
-3. 观察Kubernetes的pod初始化及启动：
+   期待输出:
 
    ```text
-    kubectl get pods --watch
+    [1][1][0][1][1][1][1][1][1][1][1]
    ```
 
-   到pod进入running状态，就说明服务已经部署好了。 输入`ctrl+c`结束观察进程。
+   观察完毕，使用`ctrl + c`结束进程。
 
-4. 通过`kn`查看该服务
-
-   通过`kubectl apply`命令创建的服务与通过`kn`创建的服务一样，可以通过`kn service list`显示出来，域名与之前是一样的。
+7. 删除`fib-service`:
 
    ```text
-    $ kn service list
-    NAME          DOMAIN                                                                GENERATION   AGE   CONDITIONS   READY   REASON
-    fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
+    kubectl delete -f fib-service.yaml
    ```
 
-5. 调用服务
-
-   调用这个服务，同样会得到从1开始的菲波纳契数列。
-
-   ```text
-    curl $MY_DOMAIN/5
-   ```
-
-   正确的输出为:
-
-   ```text
-    [1,1,2,3,5]
-   ```
-
-继续 [exercise 5](./exercise-5.md).
+恭喜你，你已经完成了Serving的全部实验！
 

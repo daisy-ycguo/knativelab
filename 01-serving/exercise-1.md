@@ -1,94 +1,102 @@
-# 安装Istio和Knative
+# 通过Knative客户端命令行创建第一个Knative服务
 
-Knative基于Kubernetes和Istio。IBM公有云上提供的Kubernetes集群可以一键安装Istio和Knative，省去安装的烦恼。
+Knative Client是Knative的客户端命令行项目，仍在开发过程中。这个实验将通过Knative命令行工具`kn`创建第一个Knative的服务。 这个服务是一个产生连续斐波纳契数列的应用。它部署后将暴露出一个端口（endpoint），向这个端口发送GET请求，就会得到斐波纳契数列的前n个数字。其中`n`通过`/`之后的参数传入。
 
 ## 前提
 
-* 分配到一个IBM Kubernetes Cluster；
-* 启动CloudShell云端命令行窗口，本次试验的所有命令行输入都在CloudShell窗口中完成；
-* 通过kubectl连接到了云端的Kubernetes集群。
+* Istio和Knative在IBM Kubernetes Cluster上安装完毕。
 
-## 第一步：使用IBM Cloud命令行工具安装
+## 第一步：部署Knative服务
 
-在CloudShell窗口中执行下面的命令，这个命令会自动安装Istio和Knative。
+产生斐波纳契数列的应用，已经被打包为一个Docker镜像，上传到了`docker.io/ibmcom/fib-knative`。现在我们将使用这个镜像以及`kn`命令创建Knative服务。
 
-```text
-$ ibmcloud ks cluster-addon-enable knative --cluster $MYCLUSTER
-Enabling add-on knative for cluster knative-guoyc...
-The istio add-on version 1.1.7 is required to enable the knative add-on. Enable istio? [y/N]> y
-OK
-```
-
-## 第二步：检查安装后的Knative
-
-在CloudShell窗口中执行下面的命令，观察Knative的安装过程，以及安装的组件。
-
-1. 列出所有的名称空间，其中knative-\*以及istio-system是安装的名称空间：
+1. 部署服务：
 
    ```text
-   $ kubectl get namespace
-   NAME                 STATUS    AGE
-   default              Active    30m
-   ibm-cert-store       Active    20m
-   ibm-system           Active    28m
-   istio-system         Active    5m20s
-   knative-build        Active    5m14s
-   knative-eventing     Active    5m14s
-   knative-monitoring   Active    5m14s
-   knative-serving      Active    5m14s
-   knative-sources      Active    5m14s
-   kube-public          Active    30m
-   kube-system          Active    30m
+    kn service create --image docker.io/ibmcom/fib-knative fib-knative
    ```
 
-2. Istio需要先于Knative安装。观察istio-system下面的pod，直到都进入running状态：
+2. 观察Kubernetes的pod初始化及启动：
 
    ```text
-   $ watch kubectl get pods -n istio-system
-   NAME                                     READY     STATUS    RESTARTS   AGE
-   cluster-local-gateway-5897bf4bdd-fr544   1/1       Running   0          4m51s
-   istio-citadel-6f58d87c48-b9v5f           1/1       Running   0          5m32s
-   istio-egressgateway-5ffbbb468-c5t6j      1/1       Running   0          5m32s
-   istio-galley-65bcc9b6f7-czqmp            1/1       Running   0          5m32s
-   istio-ingressgateway-85787c5976-2vwsp    1/1       Running   0          5m32s
-   istio-pilot-77d74c888-nqzbq              2/2       Running   0          5m32s
-   istio-policy-7f79dbbdc7-2tffd            2/2       Running   5          5m32s
-   istio-sidecar-injector-68c4dc865-p8r7v   1/1       Running   0          5m31s
-   istio-telemetry-697d4cf64-vmgzf          2/2       Running   6          5m31s
-   prometheus-7d6678d744-swb6q              1/1       Running   0          5m31s
+    kubectl get pods --watch
    ```
 
-   输入`ctrl+c`结束观察进程。
+   到pod进入running状态，就说明服务已经部署好了。 输入`ctrl+c`结束观察进程。
 
-1. Knative将安装完Istio之后开始安装。观察knative-serving下面的pod，直到都进入running状态：
+## 第二步：调用Knative服务
+
+1. 获得该服务的域名
+
+每个Knative的Service都赋予了一个域名，使用这个域名可以访问到这个服务。执行下面的命令，获取服务域名信息：
 
    ```text
-   $ kubectl get pods -n knative-serving
-   NAME                                     READY     STATUS    RESTARTS   AGE
-   activator-54f5ff5cc7-6vrlt               2/2       Running   1          4m33s
-   autoscaler-6f4965c9bd-w997f              2/2       Running   0          4m33s
-   controller-5b9bfd9594-d9bsv              1/1       Running   0          4m33s
-   networking-certmanager-d8c475984-l97j8   1/1       Running   0          4m33s
-   networking-istio-76d4b55fd4-cf6q5        1/1       Running   0          4m33s
-   webhook-75bcf549-dq587                   1/1       Running   0          4m33s
+    $ kn service list
+    NAME          DOMAIN                                                                GENERATION   AGE   CONDITIONS   READY   REASON
+    fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
    ```
 
+请注意，这里显示fib-knative的域名是这个样子的：`fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。
+
+2. 拷贝上面输出中的服务域名，将域名配置为环境变量，便于后面使用：
+
+   ```text
+    export MY_DOMAIN=<your_app_domain_here>
+   ```
+
+3. 调用服务
+
+现在我们可以调用这个Knative服务了。我们将使用`curl`命令直接向这个域名发送HTTP GET请求。请注意域名后面`/`之后的，是参数`n`，表示返回数字的个数，这里设为5。它应该返回5个斐波纳契数。
+
+   ```text
+    curl $MY_DOMAIN/5
+   ```
+
+   正确的输出为:
+
+   ```text
+    [1,1,2,3,5]
+   ```
+
+恭喜你！你已经部署完成第一个Knative服务了。你也可以尝试发送不同的`n`。
+
+***注意***：有时第一次调用需要等上几十秒钟才能获得返回，这是因为承载该服务的Kubernetes Pod需要冷启动，耗费时间。可以重复调用第二次，观察结果不到一秒钟就能返回，这是因为Pod已经是活跃状态，不需要冷启动了。
+
+## 第三步：观察Pod的自动回收和启动
+
+1. 观察Kubernetes Pod自动回收到零
+
+Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的服务，当该服务在一定时间（大约为90秒钟）内不被调用时，Pod资源应该被回收；而再次调用时，Pod应该会自动启动。现在我们来观察Pod的结束。 
+
+运行该命令，直到Pod进入`Terminating`状态，并消失。大约需要等90秒钟。
+
+   ```text
+    kubectl get pods --watch
+   ```
    输入`ctrl+c`结束观察。
 
-继续 [exercise 2](./exercise-2.md).
+这时，虽然Pod已经回收了，但是Knative Service仍然存在。观察
+   ```text
+    kn service list
+   ```
+返回的服务列表中，fib-knative仍然存在。
 
-## 参考资料
+2. 观察一个全新的Kubernetes Pod自动启动
 
-1. 如果需要卸载Knative和Istio，在CloudShell中执行这些操作：
+我们将再次通过curl命令调用Knative服务，可以预测结果返回大约需要等待几十秒钟，这是因为Knative需要启动一个全新的Pod。所以我们将在`curl`命令后面通过增加`&`字符，让系统将该进程运行在后台。
 
    ```text
-   ibmcloud ks cluster-addon-disable knative --cluster $MYCLUSTER
-   ibmcloud ks cluster-addon-disable istio --cluster $MYCLUSTER
+   $ curl $MY_DOMAIN/5 &
+   [1] 4284
    ```
 
-2. 更多学习资料
+命令执行后，5个斐波纳契数不会立刻返回，而是会返回一个进程ID，表明有个进程启动了。
 
-   想学习Kubernetes可以访问[Kube101](https://github.com/IBM/kube101/tree/master/workshop)。
+这时再次观察Pod，可以看到一个全新的Pod被启动并运行了，Pod启动后`curl`调用返回的5个斐波纳契数将输出到屏幕上。
+```
+kubectl get pods --watch
+```
+输入`ctrl+c`结束观察。
 
-   想学习Istio可以访问[Istio101](https://github.com/IBM/istio101/tree/master/workshop).
+继续 [exercise 2](./exercise-2.md).
 

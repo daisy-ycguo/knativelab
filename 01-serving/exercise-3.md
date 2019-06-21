@@ -1,44 +1,83 @@
-# 理解并观察 Knative 中的元素
+# 使用`kubectl apply`命令重建fib-service
 
-大家已经知道，一个Knative的服务，包括一个Configuration，一个路由以及一个或者多个Revision。这些都通过自定义资源CRD（CustomResourceDefinition）定义在Kubernetes中。这里我们将通过kubectl把他们显示出来。
-
-![](https://github.com/knative/serving/raw/master/docs/spec/images/object_model.png)
+Knative Client是正在开发中的项目，无法支持复杂的配置。这里我们将使用YAML文件以及`kubectl apply`命令来重新部署`fib-service`并进行流量控制。
 
 ## 前提
 
-* 第一个Knative Service `fib-service`被创建出来；
+* 通过`kn`创建的fib-service已经删除。
 
-## 步骤一：查看Knative Configuration
+## 第一步：获取本次实验的代码
 
-```text
-$ kubectl get configuration
-NAME          LATESTCREATED       LATESTREADY         READY   REASON
-fib-knative   fib-knative-kv9n4   fib-knative-kv9n4   True
-```
-
-## 步骤二：查看Knative Revision
+在CloudShell窗口中，使用git命令获取本次实验的代码。
 
 ```text
-$ kubectl get revision
-NAME                SERVICE NAME                GENERATION   READY     REASON
-fib-knative-xk4xc   fib-knative-xk4xc-service   1            True
+git clone https://github.com/daisy-ycguo/knativelab.git
 ```
 
-## 步骤三：查看Knative Route
-
-```text
-$ kubectl get route
-NAME          DOMAIN                                                                     READY     REASON
-fib-knative   fib-knative-knativelab.knativesh-guoyc.au-syd.containers.appdomain.cloud   True
+这个命令将在当前目录下创建一个knativelab的目录。本次实验所需的源代码，均在`knativelab/src`下面。运行命令
 ```
+cd knativelab/src/fib-service
+```
+进入`knativelab/src/fib-service`目录。
 
-## 步骤四：删除Knative服务
+## 第二步：部署Knative服务
 
-我们将通过其他方法再次创建该服务，这里我们先把它删掉。
+1. 查看YAML文件
+
+   我们先来看一下`fib-service.yaml`的内容，这里：
+   ```text
+    $ cat fib-service.yaml
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    metadata:
+      name: fib-knative
+      namespace: default
+    spec:
+      runLatest:
+        configuration:
+          revisionTemplate:
+            spec:
+              container:
+                image: docker.io/ibmcom/fib-knative
+   ```
+
+2. 部署服务
 
    ```text
-    $ kn service delete fib-knative
-    Service 'fib-knative' successfully deleted in namespace 'default'.
+    $ kubectl apply -f fib-service.yaml
+    service.serving.knative.dev/fib-knative created
+   ```
+
+3. 观察Kubernetes的pod初始化及启动：
+
+   ```text
+    kubectl get pods --watch
+   ```
+
+   到pod进入running状态，就说明服务已经部署好了。 输入`ctrl+c`结束观察进程。
+
+4. 通过`kn`查看该服务
+
+   通过`kubectl apply`命令创建的服务与通过`kn`创建的服务一样，可以通过`kn service list`显示出来，域名与之前是一样的。
+
+   ```text
+    $ kn service list
+    NAME          DOMAIN                                                                GENERATION   AGE   CONDITIONS   READY   REASON
+    fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
+   ```
+
+5. 调用服务
+
+   调用这个服务，同样会得到从1开始的菲波纳契数列。
+
+   ```text
+    curl $MY_DOMAIN/5
+   ```
+
+   正确的输出为:
+
+   ```text
+    [1,1,2,3,5]
    ```
 
 继续 [exercise 4](./exercise-4.md).
