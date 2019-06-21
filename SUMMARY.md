@@ -2,8 +2,8 @@
 
 * [引言](README.md)
 * [00 install](00-install/README.md)
-  * [准备Kubernetes集群环境](01-install/exercise-1.md)
-  * [安装Istio和Knative](01-install/exercise-2.md)
+  * [准备Kubernetes集群环境](00-install/exercise-1.md)
+  * [安装Istio和Knative](00-install/exercise-2.md)
 * [01 serving](01-serving/README.md)
   * [通过Knative命令行工具创建第一个Knative服务](01-serving/exercise-1.md)
   * [查看Knative中的概念元素](01-serving/exercise-2.md)

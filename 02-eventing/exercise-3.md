@@ -9,12 +9,17 @@
 cd ~/knativelab/src/brokertrigger/
 ```
 
-## 步骤一：检查缺省channel的配置
+## 步骤一：检查默认Channel的配置
 
-在Knative中，通过ConfigMap`default-channel-webhook`配置了缺省的Channel供货商，这个ConfigMap中定义了集群范围的缺省Channel供货商以及名称空间范围的缺省Channel供货商。通过下面命令可以看到，在集群范围内的缺省Channel供货商为`in-memory`。
+在Knative中，通过ConfigMap`default-channel-webhook`配置了默认的Channel供货商，这个ConfigMap中定义了集群范围的默认Channel供货商以及名称空间范围的默认Channel供货商。通过下面命令可以看到，在集群范围内的默认Channel供货商为`in-memory`。
 
+使用下面命令查询默认Channel：
 ```text
-$ kubectl get configmap default-channel-webhook -n knative-eventing -o jsonpath='{.data}'
+kubectl get configmap default-channel-webhook -n knative-eventing -o jsonpath='{.data}'
+```
+
+期待输出：
+```
 map[default-channel-config:clusterdefault:
   apiversion: eventing.knative.dev/v1alpha1
   kind: ClusterChannelProvisioner
@@ -26,16 +31,16 @@ namespacedefaults:
     name: some-other-provisioner
 ```
 
-## 步骤二：创建缺省Broker
+## 步骤二：创建默认Broker
 
-Broker可以通过两种方式创建：通过标记名称空间，可以创建缺省的Broker:
+Broker可以通过两种方式创建：通过标记名称空间，可以创建默认的Broker:
 
 ```text
 $ kubectl label namespace default knative-eventing-injection=enabled
 namespace/default labeled
 ```
 
-查看缺省Broker已经被创建:
+查看默认Broker已经被创建:
 
 ```text
 $ kubectl get broker
@@ -43,18 +48,18 @@ NAME      READY     REASON    HOSTNAME                                   AGE
 default   True                default-broker.default.svc.cluster.local   14s
 ```
 
-查看承载缺省Borker的Pod已经启动：
+查看承载默认Borker的Pod已经启动：
 ```
 $ kubectl get pods
 NAME                                              READY   STATUS    RESTARTS   AGE
 default-broker-filter-798df8bc75-77m2r            1/1     Running   0          43s
 default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          43s
 ```
-他们一个是缺省Broker的Ingress，负责接收消息，一个是缺省Broker的过滤器，负责转发消息。
+他们一个是默认Broker的Ingress，负责接收消息，一个是默认Broker的过滤器，负责转发消息。
 
 ## 步骤三：创建心跳事件源
 
-我们来创建一个心跳事件源，它将在规定的间隔内把心跳次数封装为事件消息发送给缺省Broker。心跳事件源使用了`ContainerSource`，容器镜像则为`docker.io/daisyycguo/heartbeats-6790335e994243a8d3f53b967cdd6398`。
+我们来创建一个心跳事件源，它将在规定的间隔内把心跳次数封装为事件消息发送给默认Broker。心跳事件源使用了`ContainerSource`，容器镜像则为`docker.io/daisyycguo/heartbeats-6790335e994243a8d3f53b967cdd6398`。
 
 我们先来看一下`heartbeats.yaml`的内容，这里描述了定时事件源的配置信息：
 
@@ -82,7 +87,7 @@ spec:
 可以看到，它的`spec`主要包含四部分内容：
 - image：对于一个`ContainerSource`来说，这个属性是最关键的，它说明了这个事件源要启动哪个容器镜像；
 - args和env：这是启动容器时，传递给容器的参数和环境变量；
-- sink：说明了事件消息的发送目的地，这里的配置表示，事件消息将发送到缺省的Broker中。
+- sink：说明了事件消息的发送目的地，这里的配置表示，事件消息将发送到默认的Broker中。
 
 使用下面命令创建ContainerSource `heartbeats-sender`：
 ```text
@@ -99,14 +104,17 @@ heartbeats-sender   2m
 
 检查承载`heartbeats-sender`的Pod已经启动：
 ```
-$ kubectl get pods $(kubectl get pods --selector=eventing.knative.dev/source=heartbeats-sender --output=jsonpath="{.items..metadata.name}")
+kubectl get pods $(kubectl get pods --selector=eventing.knative.dev/source=heartbeats-sender ```
+
+期待输出：
+```--output=jsonpath="{.items..metadata.name}")
 NAME                                       READY   STATUS    RESTARTS   AGE
 heartbeats-sender-dhnz8-569967d749-8wbwt   1/1     Running   0          2m21s
 ```
 
 ## 步骤四：创建Trigger，给Broker增加订阅者
 
-Trigger表明了想要订阅某些事件的愿望。我们使用Trigger将服务`event-display`订阅到缺省的Broker，它将会把发送到Broker的消息打印到日志中。
+Trigger表明了想要订阅某些事件的愿望。我们使用Trigger将服务`event-display`订阅到默认的Broker，它将会把发送到Broker的消息打印到日志中。
 
 我们先来看一下`trigger1.yaml`的内容，这里描述了Trigger的配置信息：
 ```text
@@ -180,7 +188,7 @@ Data,
     "label": ""
   }
 ```
-心跳事件消息已经被打印出来，这说明了`heartbeats-sender`创建后，产生的心跳事件消息，已经被缺省Broker接受，并转发给`event-display`，`event-display`接收消息并打印在日志中
+心跳事件消息已经被打印出来，这说明了`heartbeats-sender`创建后，产生的心跳事件消息，已经被默认Broker接受，并转发给`event-display`，`event-display`接收消息并打印在日志中
 
 观察完毕，使用`ctrl + c`结束进程。
 

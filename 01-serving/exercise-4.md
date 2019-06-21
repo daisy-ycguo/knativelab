@@ -77,7 +77,11 @@
 
    这时，如果列出所有的Revision，就能看到两个了：
    ```text
-    $ kn revision list
+   kn revision list
+   ```
+
+   期待输出：
+   ```
     SERVICE       NAME                AGE   CONDITIONS   READY   REASON
     fib-knative   fib-knative-lzsjp   1m   4 OK / 5     True
     fib-knative   fib-knative-kv9n4   5m   4 OK / 5     True
