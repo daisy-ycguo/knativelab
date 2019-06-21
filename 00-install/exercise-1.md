@@ -75,7 +75,10 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 3. 下载你的集群的配置文件到CloudShell终端：
 
    ```text
-   $ ibmcloud ks cluster-config $MYCLUSTER
+   ibmcloud ks cluster-config $MYCLUSTER
+   ```
+   期待输出：
+   ```
    OK
    The configuration for kubeconsh-guoyc was downloaded successfully.
    
@@ -93,7 +96,10 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 5. 验证您已经可以用kubectl连接到云端的Kubernetes集群：
 
    ```text
-   $ kubectl get nodes
+   kubectl get nodes
+   ```
+   期待输出：
+   ```
    NAME             STATUS   ROLES    AGE     VERSION
    10.138.173.77   Ready    <none>   112m   v1.13.7+IKS
    10.138.173.88   Ready    <none>   112m   v1.13.7+IKS

@@ -11,15 +11,18 @@ Knative基于Kubernetes和Istio。IBM公有云上提供的Kubernetes集群可以
 ## 第一步：使用IBM Cloud命令行工具安装
 
 在CloudShell窗口中执行下面的命令，这个命令会自动安装Istio和Knative。
-当提示`Enable istio? [y/N]>`输入y。
 
 ```text
-$ ibmcloud ks cluster-addon-enable knative --cluster $MYCLUSTER
+ibmcloud ks cluster-addon-enable knative --cluster $MYCLUSTER
+```
+
+当提示`Enable istio? [y/N]>`输入y。期待输出：
+```
 Enabling add-on knative for cluster knative-guoyc...
 The istio add-on version 1.1.7 is required to enable the knative add-on. Enable istio? [y/N]> y
 OK
 ```
-整个安装过程大约需要十分钟左右，请耐心等待，可以通过下面步骤检查安装进程。
+整个安装过程大约需要几分钟，请耐心等待，可以通过下面步骤检查安装进程。
 
 ## 第二步：检查安装后的Knative
 
@@ -28,7 +31,10 @@ OK
 1. 列出所有的名称空间，其中knative-\*以及istio-system是安装的名称空间：
 
    ```text
-   $ kubectl get namespace
+   kubectl get namespace
+   ```
+   期待输出：
+   ```
    NAME                 STATUS    AGE
    default              Active    30m
    ibm-cert-store       Active    20m
@@ -46,7 +52,10 @@ OK
 2. Istio需要先于Knative安装。观察istio-system下面的pod，直到都进入running状态：
 
    ```text
-   $ watch kubectl get pods -n istio-system
+   watch kubectl get pods -n istio-system
+   ```
+   期待输出：
+   ```
    NAME                                     READY     STATUS    RESTARTS   AGE
    cluster-local-gateway-5897bf4bdd-fr544   1/1       Running   0          4m51s
    istio-citadel-6f58d87c48-b9v5f           1/1       Running   0          5m32s
@@ -65,7 +74,10 @@ OK
 1. Knative将安装完Istio之后开始安装。观察knative-serving下面的pod，直到都进入running状态：
 
    ```text
-   $ watch kubectl get pods -n knative-serving
+   watch kubectl get pods -n knative-serving
+   ```
+   期待输出：
+   ```
    NAME                                     READY     STATUS    RESTARTS   AGE
    activator-54f5ff5cc7-6vrlt               2/2       Running   1          4m33s
    autoscaler-6f4965c9bd-w997f              2/2       Running   0          4m33s
