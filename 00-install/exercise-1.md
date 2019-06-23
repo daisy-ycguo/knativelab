@@ -13,17 +13,19 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 
 ## 第二步：准备CloudShell
 
-1. 访问[CloudShell](https://cloudshell-console-ikslab.us-south.cf.cloud.ibm.com/)。如果弹出窗口，要求输入CloudShell的访问密码，那么咨询IBM工作人员获取访问密码。输入密码后，就进入CloudShell页面。
+1. 访问[CloudShell](https://cloudshell-console-ikslab.us-south.cf.cloud.ibm.com/)，点击左上角的Login按钮，用IBM Cloud 账号登陆。
 
 ![](https://github.com/daisy-ycguo/knativelab/raw/master/images/cloudshell-overview.png)
 
-2. 点击左上角的Login按钮，用IBM Cloud 账号登陆。
+2. 登陆后，出现一个页面，要求输入CloudShell的访问密码。咨询IBM工作人员获取访问密码。输入密码后，就进入CloudShell页面。
+
+![](https://github.com/daisy-ycguo/knativelab/raw/master/images/cloudshell-passw.png)
 
 3. 在CloudShell页面中，点击右上角您的用户名，会弹出一个下拉框，选择IBM。 
 
 ![](https://github.com/daisy-ycguo/knativelab/raw/master/images/cloudshell-account.png)
 
-4. 点击上图中右上角的“IBM”左侧的命令行窗口图标，页面会开始刷新。大约等待几分钟，一个云上的命令行窗口就创建好了。
+4. 点击上图中右上角的“IBM”左侧的命令行窗口图标，页面会开始刷新。大约等待几分钟（等待时间与网速有关），一个云上的命令行窗口就创建好了。
 
 5. 在命令行窗口中输入几条命令，如`git`或者`kubectl`或者`kn`，看到正确返回后，就可以开始使用了。
 

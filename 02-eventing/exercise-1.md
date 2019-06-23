@@ -38,9 +38,9 @@ Knative预先安装了定时事件源类型CronJobSource，可以用这个事件
     metadata:
     name: cronjobs
     spec:
-    schedule: "*/1 * * * *"
-    data: "{\"message\": \"Hello world!\"}"
-    sink:
+      schedule: "*/1 * * * *"
+      data: "{\"message\": \"Hello world!\"}"
+      sink:
         apiVersion: serving.knative.dev/v1alpha1
         kind: Service
         name: event-display
