@@ -33,8 +33,9 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 
 ## 第三步：连接到您的Kubernetes集群
 
-一，在CloudShell页面，输入
+一，您领取到的集群名称大约为`kubecon19-knative**`，其中`**`部分为您的集群编号，如`kubecon19-knative66`。把这个集群名称记录在环境变量中。
 
+   在CloudShell页面，输入：
    ```text
    export MYCLUSTER=<your_cluster_name>
    ```
