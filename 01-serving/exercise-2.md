@@ -48,14 +48,14 @@ fib-knative   fib-knative-knativelab.knativesh-guoyc.au-syd.containers.appdomain
 
 我们将通过其他方法再次创建该服务，这里我们先把它删掉。
 
-   ```text
-    kn service delete fib-knative
-   ```
+```text
+ kn service delete fib-knative
+```
 
-   期待输出：
-   ```
-    Service 'fib-knative' successfully deleted in namespace 'default'.
-   ```
+期待输出：
+```
+ Service 'fib-knative' successfully deleted in namespace 'default'.
+```
 
 继续 [exercise 3](./exercise-3.md).
 

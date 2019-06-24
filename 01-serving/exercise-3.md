@@ -26,7 +26,11 @@ cd knativelab/src/fib-service
 
    我们先来看一下`fib-service.yaml`的内容，这里：
    ```text
-    $ cat fib-service.yaml
+    cat fib-service.yaml
+   ```
+
+   期待输出：
+   ```
     apiVersion: serving.knative.dev/v1alpha1
     kind: Service
     metadata:
@@ -44,8 +48,12 @@ cd knativelab/src/fib-service
 2. 部署服务
 
    ```text
-    $ kubectl apply -f fib-service.yaml
-    service.serving.knative.dev/fib-knative created
+    kubectl apply -f fib-service.yaml
+   ```
+
+   期待输出：
+   ```
+       service.serving.knative.dev/fib-knative created
    ```
 
 3. 观察Kubernetes的pod初始化及启动：
@@ -61,7 +69,11 @@ cd knativelab/src/fib-service
    通过`kubectl apply`命令创建的服务与通过`kn`创建的服务一样，可以通过`kn service list`显示出来，域名与之前是一样的。
 
    ```text
-    $ kn service list
+    kn service list
+   ```
+
+   期待输出：
+   ```
     NAME          DOMAIN                                                                GENERATION   AGE   CONDITIONS   READY   REASON
     fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
    ```

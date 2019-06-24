@@ -10,7 +10,11 @@
 
    通过这个命令我们将获取fib-knative服务的Revision信息，其中第二行是名字：
    ```text
-    $ kn revision list
+    kn revision list
+   ```
+
+   期待输出：
+   ```
     SERVICE       NAME                AGE   CONDITIONS   READY   REASON
     fib-knative   fib-knative-kv9n4   17m   4 OK / 5     True
    ```
@@ -20,7 +24,11 @@
 
    我们先来看一下`fib-service2.yaml`的内容，这里描述了新版本的配置信息：
    ```text
-    $ cat fib-service2.yaml
+    cat fib-service2.yaml
+   ```
+
+   期待输出：
+   ```
     apiVersion: serving.knative.dev/v1alpha1
     kind: Service
     metadata:
@@ -48,7 +56,11 @@
    ```
    再次使用cat查看编辑后的文件，注意版本名称`fib-knative-xxxxx`已经被替换为了正确的字符串：
    ```text
-    $ cat fib-service2.yaml
+    cat fib-service2.yaml
+   ```
+
+   期待输出：
+   ```
     apiVersion: serving.knative.dev/v1alpha1
     kind: Service
     metadata:
@@ -69,7 +81,11 @@
 
    使用如下的`kubectl apply`命令来部署新版本：
    ```text
-    $ kubectl apply -f fib-service2.yaml
+    kubectl apply -f fib-service2.yaml
+   ```
+
+   期待输出：
+   ```
     service.serving.knative.dev/fib-knative configured
    ```
 

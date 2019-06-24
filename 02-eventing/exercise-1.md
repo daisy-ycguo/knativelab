@@ -12,14 +12,23 @@ cd ~/knativelab/src/cronjob/
 由于Knative Service自带一个域名可以访问，所以我们创建一个Knative Service作为可访问的对象，来接受事件消息。输入下面的命令，创建`event-display`服务：
 
 ```text
-$ kn service create --image docker.io/daisyycguo/event_display-bb44423e21d22fe93666b961f6cfb013 event-display
+kn service create --image docker.io/daisyycguo/   
+```
+
+期待输出：
+```
+event_display-bb44423e21d22fe93666b961f6cfb013 event-display
 Service 'event-display' successfully created in namespace 'default'.
 ```
 
 通过下面命令检查该服务已经创建完成，`READY`那栏显示 `True`。如果还没有，请等待一段时间:
 
 ```text
-$ kn service list
+kn service list
+```
+
+期待输出：
+```
 NAME            DOMAIN                                                                   GENERATION   AGE   CONDITIONS   READY   REASON
 event-display   event-display-default.knative1-guoyc.au-syd.containers.appdomain.cloud   1            32s   3 OK / 3     True
 ```
@@ -32,7 +41,11 @@ Knative预先安装了定时事件源类型CronJobSource，可以用这个事件
 
     我们先来看一下`cronjob.yaml`的内容，这里描述了定时事件源的配置信息：
     ```text
-    $ cat cronjob.yaml
+    cat cronjob.yaml
+    ```
+
+    期待输出：
+    ```
     apiVersion: sources.eventing.knative.dev/v1alpha1
     kind: CronJobSource
     metadata:
@@ -54,14 +67,22 @@ Knative预先安装了定时事件源类型CronJobSource，可以用这个事件
     通过下面命令创建事件源`cronjobs`:
 
     ```text
-    $ kubectl apply -f cronjob.yaml
+    kubectl apply -f cronjob.yaml
+    ```
+
+    期待输出：
+    ```
     cronjobsource.sources.eventing.knative.dev/cronjobs created
     ```
     
 2. 检查该事件源已经被创建:
 
     ```text
-    $ kubectl get cronjobsource
+    kubectl get cronjobsource
+    ```
+
+    期待输出：
+    ```
     NAME       AGE
     cronjobs   44s
     ```
@@ -74,7 +95,11 @@ Knative预先安装了定时事件源类型CronJobSource，可以用这个事件
 
     下面命令将列出所有运行的Pod：
     ```
-    $ kubectl get pods
+    kubectl get pods
+    ```
+
+    期待输出：
+    ```
     NAME                                              READY   STATUS    RESTARTS   AGE
     cronjob-cronjobs-tlzm9-7d4f79bbc8-krb8q           1/1     Running   0          98s
     event-display-46hhp-deployment-597487d855-7ctj5   2/2     Running   0          37s
@@ -117,14 +142,22 @@ Knative预先安装了定时事件源类型CronJobSource，可以用这个事件
 现在我们先删除`cronjobs`，因为接下来的实验我们将采用其他方法管理事件和订阅：
 
 ```
-$ kubectl delete -f cronjob.yaml
+kubectl delete -f cronjob.yaml
+```
+
+期待输出：
+```
 cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
 ```
 
 `event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。过大约一分半钟后，观察没有运行状态的Pod了。
 
 ```
-$ kubectl get pods
+kubectl get pods
+```
+
+期待输出：
+```
 No resources found.
 ```
 
