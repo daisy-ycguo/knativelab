@@ -109,11 +109,11 @@ heartbeats-sender   2m
 
 检查承载`heartbeats-sender`的Pod已经启动，运行命令：
 ```
-kubectl get pods $(kubectl get pods --selector=eventing.knative.dev/source=heartbeats-sender 
+kubectl get pods $(kubectl get pods --selector=eventing.knative.dev/source=heartbeats-sender --output=jsonpath="{.items..metadata.name}")
 ```
 
 期待输出：
-```--output=jsonpath="{.items..metadata.name}")
+```
 NAME                                       READY   STATUS    RESTARTS   AGE
 heartbeats-sender-dhnz8-569967d749-8wbwt   1/1     Running   0          2m21s
 ```
