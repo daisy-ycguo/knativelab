@@ -10,13 +10,13 @@ Knative Client是Knative的客户端命令行项目，仍在开发过程中。�
 
 产生斐波纳契数列的应用，已经被打包为一个Docker镜像，上传到了`docker.io/ibmcom/fib-knative`。现在我们将使用这个镜像以及`kn`命令创建Knative服务。
 
-1. 部署服务：
+一， 部署服务：
 
    ```text
     kn service create --image docker.io/ibmcom/fib-knative fib-knative
    ```
 
-2. 观察Kubernetes的pod初始化及启动：
+二， 观察Kubernetes的pod初始化及启动：
 
    ```text
     kubectl get pods --watch
@@ -26,7 +26,7 @@ Knative Client是Knative的客户端命令行项目，仍在开发过程中。�
 
 ## 第二步：调用Knative服务
 
-1. 获得该服务的域名
+一， 获得该服务的域名
 
 每个Knative的Service都赋予了一个域名，使用这个域名可以访问到这个服务。执行下面的命令，获取服务域名信息：
 
@@ -40,15 +40,15 @@ Knative Client是Knative的客户端命令行项目，仍在开发过程中。�
     fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
    ```
 
-请注意，这里显示fib-knative的域名是这个样子的：`fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。
+***请注意***，这里显示fib-knative的域名是这个样子的：`fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud`。因为每个人使用的IKS不同，域名也略有差别。
 
-2. 拷贝上面输出中的服务域名，将域名配置为环境变量，便于后面使用：
+二， 拷贝上面输出中的服务域名，将域名配置为环境变量，便于后面使用：
 
    ```text
     export MY_DOMAIN=<your_app_domain_here>
    ```
 
-3. 调用服务
+三， 调用服务
 
 现在我们可以调用这个Knative服务了。我们将使用`curl`命令直接向这个域名发送HTTP GET请求。请注意域名后面`/`之后的，是参数`n`，表示返回数字的个数，这里设为5。它应该返回5个斐波纳契数。
 
@@ -68,7 +68,7 @@ Knative Client是Knative的客户端命令行项目，仍在开发过程中。�
 
 ## 第三步：观察Pod的自动回收和启动
 
-1. 观察Kubernetes Pod自动回收到零
+一，观察Kubernetes Pod自动回收到零
 
 Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的服务，当该服务在一定时间（大约为90秒钟）内不被调用时，Pod资源应该被回收；而再次调用时，Pod应该会自动启动。现在我们来观察Pod的结束。 
 
@@ -85,7 +85,7 @@ Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的�
    ```
 返回的服务列表中，fib-knative仍然存在。
 
-2. 观察一个全新的Kubernetes Pod自动启动
+二，观察一个全新的Kubernetes Pod自动启动
 
 我们将再次通过curl命令调用Knative服务，可以预测结果返回大约需要等待几十秒钟，这是因为Knative需要启动一个全新的Pod。所以我们将在`curl`命令后面通过增加`&`字符，让系统将该进程运行在后台。
 
