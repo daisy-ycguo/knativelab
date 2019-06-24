@@ -122,7 +122,7 @@
 7. 删除`fib-service`:
 
    ```text
-    kubectl delete -f fib-service.yaml
+    kubectl delete -f fib-service2.yaml
    ```
 
 恭喜你，你已经完成了Serving的全部实验！
