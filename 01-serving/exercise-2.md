@@ -11,7 +11,11 @@
 ## 步骤一：查看Knative Configuration
 
 ```text
-$ kubectl get configuration
+kubectl get configuration
+```
+
+期待输出：
+```
 NAME          LATESTCREATED       LATESTREADY         READY   REASON
 fib-knative   fib-knative-kv9n4   fib-knative-kv9n4   True
 ```
@@ -19,7 +23,11 @@ fib-knative   fib-knative-kv9n4   fib-knative-kv9n4   True
 ## 步骤二：查看Knative Revision
 
 ```text
-$ kubectl get revision
+kubectl get revision
+```
+
+期待输出：
+```
 NAME                SERVICE NAME                GENERATION   READY     REASON
 fib-knative-xk4xc   fib-knative-xk4xc-service   1            True
 ```
@@ -27,7 +35,11 @@ fib-knative-xk4xc   fib-knative-xk4xc-service   1            True
 ## 步骤三：查看Knative Route
 
 ```text
-$ kubectl get route
+kubectl get route
+```
+
+期待输出：
+```
 NAME          DOMAIN                                                                     READY     REASON
 fib-knative   fib-knative-knativelab.knativesh-guoyc.au-syd.containers.appdomain.cloud   True
 ```
@@ -37,7 +49,11 @@ fib-knative   fib-knative-knativelab.knativesh-guoyc.au-syd.containers.appdomain
 我们将通过其他方法再次创建该服务，这里我们先把它删掉。
 
    ```text
-    $ kn service delete fib-knative
+    kn service delete fib-knative
+   ```
+
+   期待输出：
+   ```
     Service 'fib-knative' successfully deleted in namespace 'default'.
    ```
 

@@ -31,7 +31,11 @@ Knative Client是Knative的客户端命令行项目，仍在开发过程中。�
 每个Knative的Service都赋予了一个域名，使用这个域名可以访问到这个服务。执行下面的命令，获取服务域名信息：
 
    ```text
-    $ kn service list
+    kn service list
+   ```
+
+   期待输出：
+   ```
     NAME          DOMAIN                                                                GENERATION   AGE   CONDITIONS   READY   REASON
     fib-knative   fib-knative-default.knative-guoyc.au-syd.containers.appdomain.cloud   1            96s   3 OK / 3     True
    ```
@@ -86,7 +90,11 @@ Knative服务，具体是由Kubernetes的Pod来实现的。作为Serverless的�
 我们将再次通过curl命令调用Knative服务，可以预测结果返回大约需要等待几十秒钟，这是因为Knative需要启动一个全新的Pod。所以我们将在`curl`命令后面通过增加`&`字符，让系统将该进程运行在后台。
 
    ```text
-   $ curl $MY_DOMAIN/5 &
+    curl $MY_DOMAIN/5 &
+   ```
+
+   期待输出：
+   ```
    [1] 4284
    ```
 
