@@ -41,8 +41,13 @@ Knative Lab使用了IBM公有云上的Kubernetes集群，以及一个云上的�
 
 二，获取你的集群的更多信息：
 
+运行命令：
 ```text
-$ ibmcloud ks cluster-get $MYCLUSTER
+ibmcloud ks cluster-get $MYCLUSTER
+```
+
+期待输出：
+```
 Retrieving cluster knative-guoyc...
 OK
 
@@ -75,6 +80,7 @@ Resource Group Name:            default
 
 三，下载你的集群的配置文件到CloudShell终端：
 
+   运行命令：
    ```text
    ibmcloud ks cluster-config $MYCLUSTER
    ```
@@ -96,6 +102,7 @@ Resource Group Name:            default
 
 五，验证您已经可以用kubectl连接到云端的Kubernetes集群：
 
+   运行命令：
    ```text
    kubectl get nodes
    ```

@@ -11,44 +11,65 @@ cd ~/knativelab/src/brokertrigger/
 
 1. 创建`CronJobSource`
 
-下面命令将创建`cronjobs`事件源：
+下面命令将创建`cronjobs`事件源，运行命令：
 ```text
-$ kubectl apply -f cronjob.yaml
+kubectl apply -f cronjob.yaml
+```
+
+期待输出：
+```
 cronjobsource.sources.eventing.knative.dev/cronjobs created
 ```
 
-检查cronjobs已经被创建：
+检查cronjobs已经被创建，运行命令：
 ```
-$ kubectl get CronJobSource
+kubectl get CronJobSource
+```
+
+期待输出：
+```
 NAME       AGE
 cronjobs   23s
 ```
 
 2. 检查`event-display`的日志
 
-查看`event-display`，你将会看到两种类型的消息，分别来自`heartbeats-sender` and `cronjobs`:
+查看`event-display`，你将会看到两种类型的消息，分别来自`heartbeats-sender` and `cronjobs`，运行命令:
 
 ```text
-$ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
+kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/
+```
+
+期待输出：
+```
+configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
 来自`cronjobs`的消息带有`Hello world!`字符串，而来自`heartbeats-sender`的消息则带有心跳次数`"id": 26`。
 
 观察完毕，使用`ctrl + c`结束进程。
 
-在重新创建更复杂的Trigger之前，先让我们来删除这次实验中创建的Trigger：
+在重新创建更复杂的Trigger之前，先让我们来删除这次实验中创建的Trigger，运行命令：
 
 ```
-$ kubectl delete -f trigger1.yaml
+kubectl delete -f trigger1.yaml
+```
+
+期待输出：
+```
 trigger.eventing.knative.dev "mytrigger" deleted
 ```
 
 ## 步骤二：增加过滤器Filter
 
-我们先来看一下`trigger2.yaml`的内容，与之前的`trigger1.yaml`相比，它增加了过滤器的配置信息：
+我们先来看一下`trigger2.yaml`的内容，与之前的`trigger1.yaml`相比，它增加了过滤器的配置信息，运行命令：
 
 ```text
-$ cat trigger2.yaml
+cat trigger2.yaml
+```
+
+期待输出：
+```
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:
@@ -66,23 +87,31 @@ spec:
 
 可以看到，它的`spec`中的`filter`表明，这次订阅只针对那么类型为`dev.knative.cronjob.event`的事件消息，即由`cronjobs`产生的消息。
 
-使用`trigger2.yaml`创建新的`mytrigger`：
+使用`trigger2.yaml`创建新的`mytrigger`，运行命令：
 
 ```text
-$ kubectl apply -f trigger2.yaml
+kubectl apply -f trigger2.yaml
+```
+
+期待输出：
+```
 trigger.eventing.knative.dev/mytrigger created.
 ```
 
-查看`mytrigger`已经创建好：
+查看`mytrigger`已经创建好，运行命令：
 ```text
-$ kubectl get trigger
+kubectl get trigger
+```
+
+期待输出：
+```
 NAME        READY     REASON    BROKER    SUBSCRIBER_URI                                    AGE
 mytrigger   True                default   http://event-display.default.svc.cluster.local/   29s
 ```
 
 ## 步骤三：检查event-display的日志
 
-用这个命令查看`event-display`的日志：
+用这个命令查看`event-display`的日志，运行命令：
 ```
 kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
@@ -93,9 +122,13 @@ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=
 
 ## 步骤四：删除所创建的对象
 
-通过下面命令删除实验中创建的Trigger，事件源以及服务：
+通过下面命令删除实验中创建的Trigger，事件源以及服务，运行命令：
 ```
-$ source deleteall.sh
+source deleteall.sh
+```
+
+期待输出：
+```
 trigger.eventing.knative.dev "mytrigger" deleted
 cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
 containersource.sources.eventing.knative.dev "heartbeats-sender" deleted
