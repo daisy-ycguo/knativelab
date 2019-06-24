@@ -37,15 +37,10 @@ cronjobs   23s
 查看`event-display`，你将会看到两种类型的消息，分别来自`heartbeats-sender` and `cronjobs`，运行命令:
 
 ```text
-kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/
+kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
-期待输出：
-```
-configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
-```
-
-来自`cronjobs`的消息带有`Hello world!`字符串，而来自`heartbeats-sender`的消息则带有心跳次数`"id": 26`。
+在日志能能看到2种类型的消息，来自`cronjobs`的消息带有`Hello world!`字符串，而来自`heartbeats-sender`的消息则带有心跳次数`"id": 26`。
 
 观察完毕，使用`ctrl + c`结束进程。
 

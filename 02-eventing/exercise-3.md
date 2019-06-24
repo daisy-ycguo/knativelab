@@ -9,29 +9,7 @@
 cd ~/knativelab/src/brokertrigger/
 ```
 
-## 步骤一：检查默认Channel的配置
-
-在Knative中，通过ConfigMap`default-channel-webhook`配置了默认的Channel供货商，这个ConfigMap中定义了集群范围的默认Channel供货商以及名称空间范围的默认Channel供货商。通过下面命令可以看到，在集群范围内的默认Channel供货商为`in-memory`。
-
-使用下面命令查询默认Channel，运行命令：
-```text
-kubectl get configmap default-channel-webhook -n knative-eventing -o jsonpath='{.data}'
-```
-
-期待输出：
-```
-map[default-channel-config:clusterdefault:
-  apiversion: eventing.knative.dev/v1alpha1
-  kind: ClusterChannelProvisioner
-  name: in-memory
-namespacedefaults:
-  some-namespace:
-    apiversion: eventing.knative.dev/v1alpha1
-    kind: ClusterChannelProvisioner
-    name: some-other-provisioner
-```
-
-## 步骤二：创建默认Broker
+## 步骤一：创建默认Broker
 
 Broker可以通过两种方式创建：通过标记名称空间，可以创建默认的Broker。
 
@@ -69,7 +47,7 @@ default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          4
 ```
 他们一个是默认Broker的Ingress，负责接收消息，一个是默认Broker的过滤器，负责转发消息。
 
-## 步骤三：创建心跳事件源
+## 步骤二：创建心跳事件源
 
 我们来创建一个心跳事件源，它将在规定的间隔内把心跳次数封装为事件消息发送给默认Broker。心跳事件源使用了`ContainerSource`，容器镜像则为`docker.io/daisyycguo/heartbeats-6790335e994243a8d3f53b967cdd6398`。
 
@@ -138,7 +116,7 @@ NAME                                       READY   STATUS    RESTARTS   AGE
 heartbeats-sender-dhnz8-569967d749-8wbwt   1/1     Running   0          2m21s
 ```
 
-## 步骤四：创建Trigger，给Broker增加订阅者
+## 步骤三：创建Trigger，给Broker增加订阅者
 
 Trigger表明了想要订阅某些事件的愿望。我们使用Trigger将服务`event-display`订阅到默认的Broker，它将会把发送到Broker的消息打印到日志中。
 
@@ -184,7 +162,7 @@ NAME        READY     REASON    BROKER    SUBSCRIBER_URI                        
 mytrigger   True                default   http://event-display.default.svc.cluster.local/   29s
 ```
 
-## 步骤五：检查event-display的日志
+## 步骤四：检查event-display的日志
 
 下面命令将列出所有运行的Pod，观察`event-display`应用所在的Pod已经开始运行，运行命令：
 ```
