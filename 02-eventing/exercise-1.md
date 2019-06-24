@@ -12,7 +12,7 @@ cd ~/knativelab/src/cronjob/
 由于Knative Service自带一个域名可以访问，所以我们创建一个Knative Service作为可访问的对象，来接受事件消息。输入下面的命令，创建`event-display`服务：
 
 ```text
-kn service create --image docker.io/daisyycguo/ event_display-bb44423e21d22fe93666b961f6cfb013 event-display 
+kn service create --image docker.io/daisyycguo/event_display-bb44423e21d22fe93666b961f6cfb013 event-display 
 ```
 
 期待输出：
