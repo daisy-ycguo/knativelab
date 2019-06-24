@@ -149,13 +149,23 @@ kubectl delete -f cronjob.yaml
 cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
 ```
 
-`event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。过大约一分半钟后，观察没有运行状态的Pod了。
+`event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。
 
 ```
 kubectl get pods
 ```
 
-期待输出：
+可能的输出：
+```
+NAME                                              READY   STATUS    RESTARTS   AGE
+event-display-rpxcz-deployment-58676c965b-2j6jl   2/2     Running   0          3m46s
+```
+或者
+```
+NAME                                              READY   STATUS        RESTARTS   AGE
+event-display-rpxcz-deployment-58676c965b-2j6jl   2/2     Terminating   0          4m14s
+```
+或者
 ```
 No resources found.
 ```

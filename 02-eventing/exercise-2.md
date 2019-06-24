@@ -197,7 +197,7 @@ Knative预先安装了定时事件源类型CronJobSource，可以用这个事件
 
 ## 步骤三：检查event-display的日志
 
-下面命令将列出所有运行的Pod，观察`event-display`应用所在的Pod已经开始运行。
+下面命令将列出所有运行的Pod，观察`event-display`应用所在的Pod已经开始运行。Cronjob每1分钟产生一个消息，有时需要等待1分钟才能看到`event-display`所在的Pod。
 
 运行命令：
 ```
@@ -211,7 +211,7 @@ cronjob-cronjobs-9wcq9-7d75fdbd8c-m5ddh           1/1     Running   0          8
 event-display-46hhp-deployment-597487d855-67gvm   2/2     Running   0          50s
 ```
 
-查看`event-display`的日志，CloudEvent消息已经被打印出来，这说明了`cronjobs`创建后，产生的定时CloudEvent消息，已经被`event-display`接收并打印在日志中：
+`event-display`所在的Pod开始运行后，可以查看`event-display`的日志，CloudEvent消息已经被打印出来，这说明了`cronjobs`创建后，产生的定时CloudEvent消息，已经被`event-display`接收并打印在日志中：
 ```
 kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
@@ -233,14 +233,23 @@ cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
 subscription.eventing.knative.dev "mysubscription" deleted
 ```
 
-`event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。过大约一分半钟后，观察没有运行状态的Pod了。
+`event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。
 
-运行命令：
 ```
 kubectl get pods
 ```
 
-期待输出：
+可能的输出：
+```
+NAME                                              READY   STATUS    RESTARTS   AGE
+event-display-rpxcz-deployment-58676c965b-2j6jl   2/2     Running   0          3m46s
+```
+或者
+```
+NAME                                              READY   STATUS        RESTARTS   AGE
+event-display-rpxcz-deployment-58676c965b-2j6jl   2/2     Terminating   0          4m14s
+```
+或者
 ```
 No resources found.
 ```
