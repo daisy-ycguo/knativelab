@@ -2,6 +2,8 @@
 
 这里我们将使用Broker和Trigger管理事件和订阅。我们将使用`ContainerSource`作为事件源。
 
+![](https://github.com/daisy-ycguo/knativelab/raw/master/images/Knative-triggermode.png)
+
 发送到Broker的事件，将被转发给任何对该消息感兴趣的订阅者。
 
 ***注意*** 下面的操作要求在目录`knativelab/src/brokertrigger`中进行，可以在CloudShell窗口执行下面命令进入该目录：

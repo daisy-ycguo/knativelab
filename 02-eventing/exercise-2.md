@@ -2,6 +2,8 @@
 
 这里我们将使用Channel和Subscription管理事件和订阅。我们仍将使用定时事件`Cronjob`。订阅事件的可访问的对象（Accessable）仍然是Knative Service `event-display`。
 
+![](https://github.com/daisy-ycguo/knativelab/raw/master/images/Knative-middlemodel.png)
+
 ***注意*** 下面的操作要求在目录`knativelab/src/subscription`中进行，可以在CloudShell窗口执行下面命令进入该目录：
 ```
 cd ~/knativelab/src/subscription/

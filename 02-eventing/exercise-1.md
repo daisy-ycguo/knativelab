@@ -2,6 +2,8 @@
 
 在这个练习中，我们将使用定时事件`Cronjob`。我们会创建一个可访问的对象（Accessable）来接收事件消息，并把它打印到日志中。
 
+![](https://github.com/daisy-ycguo/knativelab/raw/master/images/knative-simplemode.png)
+
 ***注意*** 下面的操作要求在目录`knativelab/src/cronjob`中进行，可以在CloudShell窗口执行下面命令进入该目录：
 ```
 cd ~/knativelab/src/cronjob/
