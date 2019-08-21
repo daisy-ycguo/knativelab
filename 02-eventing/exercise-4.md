@@ -44,17 +44,6 @@ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=
 
 观察完毕，使用`ctrl + c`结束进程。
 
-在重新创建更复杂的Trigger之前，先让我们来删除这次实验中创建的Trigger，运行命令：
-
-```
-kubectl delete -f trigger1.yaml
-```
-
-期待输出：
-```
-trigger.eventing.knative.dev "mytrigger" deleted
-```
-
 ## 步骤二：增加过滤器Filter
 
 我们先来看一下`trigger2.yaml`的内容，与之前的`trigger1.yaml`相比，它增加了过滤器的配置信息，运行命令：
@@ -90,7 +79,7 @@ kubectl apply -f trigger2.yaml
 
 期待输出：
 ```
-trigger.eventing.knative.dev/mytrigger created.
+trigger.eventing.knative.dev/mytrigger configured
 ```
 
 查看`mytrigger`已经创建好，运行命令：
