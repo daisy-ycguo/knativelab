@@ -1,17 +1,10 @@
 apiVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
+kind: Trigger
 metadata:
-  name: mysubscription
-  namespace: default
+  name: mytrigger
 spec:
-  channel:
-    apiVersion: messaging.knative.dev/v1alpha1
-    kind: Channel
-    name: my-channel
   subscriber:
     ref:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
       name: event-display
-
-

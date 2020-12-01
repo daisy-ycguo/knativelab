@@ -1,9 +1,5 @@
-apiVersion: eventing.knative.dev/v1alpha1
+apiVersion: messaging.knative.dev/v1alpha1
 kind: Channel
 metadata:
-  name: mychannel
-spec:
-  provisioner:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: ClusterChannelProvisioner
-    name: in-memory
+  name: my-channel
+  namespace: default

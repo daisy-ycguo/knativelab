@@ -13,7 +13,7 @@ Knative基于Kubernetes和Istio。IBM公有云上提供的Kubernetes集群可以
 在CloudShell窗口中执行下面的命令，这个命令会自动安装Istio和Knative。
 
 ```text
-ibmcloud ks cluster-addon-enable knative --cluster $MYCLUSTER
+ibmcloud ks cluster addon enable knative --cluster $MYCLUSTER
 ```
 
 当提示`Enable istio? [y/N]>`输入y。期待输出：

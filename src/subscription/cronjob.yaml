@@ -4,8 +4,8 @@ metadata:
   name: cronjobs
 spec:
   schedule: "*/1 * * * *"
-  data: "{\"message\": \"Hello world!\"}"
+  data: "{\"message\": \"Hello Channel!\"}"
   sink:
-    apiVersion: eventing.knative.dev/v1alpha1
+    apiVersion: messaging.knative.dev/v1alpha1
     kind: Channel
-    name: foo
+    name: my-channel
